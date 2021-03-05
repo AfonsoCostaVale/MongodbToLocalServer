@@ -5,24 +5,31 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
-public class MongodbLocalWriter {
+public class MongodbLocalWriter extends Thread{
     private MongoClient mongoClient;
     private MongoDatabase db;
-    private MongoCollection<Document> collection;
+    private MongoCollection<Document> collectionToWrite;
+    private MongoCollection<Document> collectionToRead;
 
-    protected MongodbLocalWriter(){
+    protected MongodbLocalWriter(String collection, MongoCollection<Document> collectionToRead){
         mongoClient = new MongoClient( "localhost" , 27017 );
         db = mongoClient.getDatabase("sid");
-        collection = null;
+        this.collectionToWrite = db.getCollection(collection);
+        this.collectionToRead = collectionToRead;
+    }
+
+    public void run() {
+        System.out.println("Started writing in "+ collectionToWrite.getNamespace().getFullName());
+
+        for(Document entry : collectionToRead.find()) {
+            write(entry);
+        }
+
+        System.out.println("Finished writing in "+ collectionToWrite.getNamespace().getFullName());
     }
 
     protected void write(Document doc){
-        collection.insertOne(doc);
-        System.out.println("Entry added in collection "+ collection.getNamespace());
-    }
-
-    protected void setCollection(String collection){
-        this.collection = db.getCollection(collection);
+        collectionToWrite.insertOne(doc);
     }
 
 }

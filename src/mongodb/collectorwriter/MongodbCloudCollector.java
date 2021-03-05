@@ -7,6 +7,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MongodbCloudCollector {
@@ -19,7 +20,12 @@ public class MongodbCloudCollector {
     final static String[] collections={"sensorh1","sensorh2","sensorl1","sensorl2","sensort1","sensort2"};
 
     public static void collect(){
-        writeInfo(createClient().getDatabase(database));
+        try {
+            writeInfo(createClient().getDatabase(database));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.out.println("Could not write collections to local server");
+        }
     }
 
     private static MongoClient createClient(){
@@ -28,19 +34,24 @@ public class MongodbCloudCollector {
         return mongoClient;
     }
 
-    private static void writeInfo(MongoDatabase db){
-        MongodbLocalWriter mongodbLocalWriter = new MongodbLocalWriter();
+    private static void writeInfo(MongoDatabase db) throws InterruptedException {
+
+        ArrayList<MongodbLocalWriter> writers = new ArrayList<>();
+
+        System.out.println("Started writing collections");
+
         for(String collection: collections){
-            mongodbLocalWriter.setCollection(collection);
             MongoCollection<Document> table = db.getCollection(collection);
-            System.out.println("Started writing in "+ collection);
-            writeInfoCollection(db, mongodbLocalWriter, table);
+            MongodbLocalWriter mongodbLocalWriter = new MongodbLocalWriter(collection, table);
+            writers.add(mongodbLocalWriter);
+            mongodbLocalWriter.start();
         }
+
+        for(MongodbLocalWriter mongodbLocalWriter: writers){
+            mongodbLocalWriter.join();
+        }
+
+        System.out.println("Finished writing collections");
     }
 
-    private static void writeInfoCollection(MongoDatabase db, MongodbLocalWriter mongodbLocalWriter, MongoCollection<Document> table){
-        for(Document entry : table.find()) {
-            mongodbLocalWriter.write(entry);
-        }
-    }
 }
