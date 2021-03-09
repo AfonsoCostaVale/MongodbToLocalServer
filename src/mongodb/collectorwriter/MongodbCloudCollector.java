@@ -38,7 +38,7 @@ public class MongodbCloudCollector {
 
         ArrayList<MongodbLocalWriter> writers = new ArrayList<>();
 
-        System.out.println("Started writing collections");
+     //   System.out.println("Started writing collections");
 
         for(String collection: collections){
             MongoCollection<Document> table = db.getCollection(collection);
@@ -47,11 +47,12 @@ public class MongodbCloudCollector {
             mongodbLocalWriter.start();
         }
 
-        for(MongodbLocalWriter mongodbLocalWriter: writers){
+      /*  for(MongodbLocalWriter mongodbLocalWriter: writers){
             mongodbLocalWriter.join();
         }
 
-        System.out.println("Finished writing collections");
+        System.out.println("Finished writing collections");*/
+
     }
 
 }

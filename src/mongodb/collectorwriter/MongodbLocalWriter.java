@@ -30,7 +30,7 @@ public class MongodbLocalWriter extends Thread{
             maybe compare the first ones to check if they deleted the first ones to save space
         */
 
-        for(Document entry : collectionToRead.find().skip((int) collectionToWrite.count())) {
+       for(Document entry : collectionToRead.find().skip((int) collectionToWrite.count())) {
             try{
                 write(entry);
             }catch (MongoWriteException e){
@@ -38,9 +38,28 @@ public class MongodbLocalWriter extends Thread{
                     System.out.println("Found Duplicate");
                 }
             }
+       }
+
+       enterCheckMode();
+    }
+
+    private void enterCheckMode(){
+
+        System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
+
+        while(true){
+            try {
+                write(collectionToRead.find().skip((int) collectionToWrite.count()).first());
+                System.out.println("Added "+ collectionToWrite.getNamespace().getFullName());
+            }catch (MongoWriteException e){
+                if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+                    System.out.println("Found Duplicate");
+                }
+            }catch (IllegalArgumentException e){
+
+            }
         }
 
-        System.out.println("Finished writing in "+ collectionToWrite.getNamespace().getFullName());
     }
 
     protected void write(Document doc){
