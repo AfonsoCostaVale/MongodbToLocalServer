@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MongodbCloudCollector {
-
+    /*
     final static String user = "aluno";
     final static String databaseUsers = "admin";
     final static String database = "sid2021";
@@ -19,45 +19,45 @@ public class MongodbCloudCollector {
     final static int port = 27017;
     final static char[] password = {'a', 'l', 'u', 'n', 'o'};
     final static String[] collections = {"sensorh1", "sensorh2", "sensorl1", "sensorl2", "sensort1", "sensort2"};
+    */
     private MongodbCloudCollectorData data;
 
     public MongodbCloudCollector(MongodbCloudCollectorData data) {
         this.data = data;
     }
 
-    public static void collect() {
+    public void collect() {
         try {
-            writeInfo(createClient().getDatabase(database));
+            writeInfo(createClient().getDatabase(getData().getDatabase()));
         } catch (InterruptedException e) {
             e.printStackTrace();
             System.out.println("Could not write collections to local server");
         }
     }
 
-    private static MongoClient createClient() {
-        MongoCredential credential = MongoCredential.createCredential(user, databaseUsers, password);
-        MongoClient mongoClient = new MongoClient(new ServerAddress(ip, port), Arrays.asList(credential));
+    private MongoClient createClient() {
+        MongoCredential credential = MongoCredential.createCredential(data.getUser(), data.getDatabaseUser(), data.getPassword());
+        MongoClient mongoClient = new MongoClient(new ServerAddress(data.getIp(), data.getPort()), Arrays.asList(credential));
         return mongoClient;
     }
 
-    private static void writeInfo(MongoDatabase db) throws InterruptedException {
+    private void writeInfo(MongoDatabase db) throws InterruptedException {
 
         ArrayList<MongodbLocalWriter> writers = new ArrayList<>();
 
         //   System.out.println("Started writing collections");
 
-        for (String collection : collections) {
+        for (String collection : data.getCollections()) {
             MongoCollection<Document> table = db.getCollection(collection);
             MongodbLocalWriter mongodbLocalWriter = new MongodbLocalWriter(collection, table);
             writers.add(mongodbLocalWriter);
             mongodbLocalWriter.start();
         }
 
-      /*  for(MongodbLocalWriter mongodbLocalWriter: writers){
-            mongodbLocalWriter.join();
-        }
-
-        System.out.println("Finished writing collections");*/
+        /*
+        for(MongodbLocalWriter mongodbLocalWriter: writers){mongodbLocalWriter.join();}
+        System.out.println("Finished writing collections");
+        */
 
     }
 
@@ -71,19 +71,36 @@ public class MongodbCloudCollector {
 
     public static class MongodbCloudCollectorData {
         public static final String USER = "user";
-        public static final String DATABASEUSERS = "databaseUsers";
+        public static final String DATABASEUSER = "databaseUsers";
         public static final String DATABASE = "database";
         public static final String IP = "ip";
         public static final String PORT = "port";
         public static final String PASSWORD = "password";
         public static final String COLLECTIONS = "collections";
         private String user;
-        private String databaseUsers;
+        private String databaseUser;
         private String database;
         private String ip;
         private int port;
         private char[] password;
         private String[] collections;
+
+        public MongodbCloudCollectorData() {}
+        public MongodbCloudCollectorData(String user,
+                                         String databaseUser,
+                                         String database,
+                                         String ip,
+                                         int port,
+                                         char[] password,
+                                         String[] collections) {
+            this.user = user;
+            this.databaseUser = databaseUser;
+            this.database = database;
+            this.ip = ip;
+            this.port = port;
+            this.password = password;
+            this.collections = collections;
+        }
 
         public String getUser() {
             return user;
@@ -93,12 +110,12 @@ public class MongodbCloudCollector {
             this.user = user;
         }
 
-        public String getDatabaseUsers() {
-            return databaseUsers;
+        public String getDatabaseUser() {
+            return databaseUser;
         }
 
-        public void setDatabaseUsers(String databaseUsers) {
-            this.databaseUsers = databaseUsers;
+        public void setDatabaseUser(String databaseUser) {
+            this.databaseUser = databaseUser;
         }
 
         public String getDatabase() {

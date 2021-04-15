@@ -4,36 +4,50 @@ import mongodb.collectorwriter.MongodbCloudCollector;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import static mongodb.collectorwriter.MongodbCloudCollector.MongodbCloudCollectorData.*;
 
 public class ConfigManager {
     private static final String[] COMMENT =
-            {"//Nome do utilizador da base de dados\n",
-            "//User a usar na base de dados\n",
-            "//Nome da database para o mongo conectar\n",
-            "//Ip a usar","//Porta a usar para efetuar a configuração\n",
-            "//Password a usar para entrar no mongodb\n",
-            "//Nome das coleções a clonar, separadas por \";\"\n"};
+            {
+                    "//Nome do utilizador da base de dados\n",
+                    "//User a usar na base de dados\n",
+                    "//Nome da database para o mongo conectar\n",
+                    "//Ip a usar\n",
+                    "//Porta a usar para efetuar a configuração\n",
+                    "//Password a usar para entrar no mongodb\n",
+                    "//Nome das coleções a clonar, separadas por \";\"\n"
+            };
 
     public static void writeToFile(String filename, MongodbCloudCollector.MongodbCloudCollectorData toWrite) {
-        try (FileWriter myWriter = new FileWriter("filename.txt")) {
+        try (FileWriter myWriter = new FileWriter(filename)) {
             clearConfigFile(filename);
             myWriter.write(COMMENT[0]);
-            myWriter.write(toWrite.getUser() + "\n");
+            myWriter.write(USER+"="+toWrite.getUser() + "\n");
             myWriter.write(COMMENT[1]);
-            myWriter.write(toWrite.getDatabaseUsers() + "\n");
+            myWriter.write(DATABASEUSER+"="+toWrite.getDatabaseUser() + "\n");
             myWriter.write(COMMENT[2]);
-            myWriter.write(toWrite.getDatabase() + "\n");
+            myWriter.write(DATABASE+"="+toWrite.getDatabase() + "\n");
             myWriter.write(COMMENT[3]);
-            myWriter.write(toWrite.getIp() + "\n");
+            myWriter.write(IP+"="+toWrite.getIp() + "\n");
             myWriter.write(COMMENT[4]);
-            myWriter.write(toWrite.getPort() + "\n");
+            myWriter.write(PORT+"="+toWrite.getPort() + "\n");
             myWriter.write(COMMENT[5]);
-            myWriter.write(toWrite.getPassword() + "\n");
+            String tempCharacter ="";
+            for (Character character  :toWrite.getPassword() ) {
+                tempCharacter+=(character);
+            }
+            myWriter.write(PASSWORD+"="+ tempCharacter + "\n");
             myWriter.write(COMMENT[6]);
-            myWriter.write(toWrite.getCollections() + "\n");
+
+            String tempCollections="";
+            for (String collection  :toWrite.getCollections() ) {
+                tempCollections+=(collection+";");
+            }
+            tempCollections =tempCollections.substring(0,tempCollections.length()-1);
+            myWriter.write(COLLECTIONS+"="+tempCollections+"\n");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -43,9 +57,7 @@ public class ConfigManager {
             FileOutputStream fileOut = new FileOutputStream(filename);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);)
         {
-
             out.writeObject(toWrite);
-
         } catch (FileNotFoundException fileNotFoundException) {
             fileNotFoundException.printStackTrace();
         } catch (IOException ioException) {
@@ -68,8 +80,8 @@ public class ConfigManager {
                     case USER:
                         data.setUser(lineContent[1]);
                         break;
-                    case DATABASEUSERS:
-                        data.setDatabaseUsers(lineContent[1]);
+                    case DATABASEUSER:
+                        data.setDatabaseUser(lineContent[1]);
                         break;
                     case DATABASE:
                         data.setDatabase(lineContent[1]);
