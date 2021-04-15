@@ -70,6 +70,17 @@ public class MongodbCloudCollector extends Thread{
         public static final String PORT = "port";
         public static final String PASSWORD = "password";
         public static final String COLLECTIONS = "collections";
+
+        public static final MongodbCloudCollectorData DEFAULTCOLLECTORDATA= new MongodbCloudCollectorData(
+                "aluno",
+                "admin",
+                "sid2021",
+                "194.210.86.10",
+                27017,
+                new char[]{'a', 'l', 'u', 'n', 'o'},
+                new String[]{"sensorh1", "sensorh2", "sensorl1", "sensorl2", "sensort1", "sensort2"}
+        );
+
         private String user;
         private String databaseUser;
         private String database;
