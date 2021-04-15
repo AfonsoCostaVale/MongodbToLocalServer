@@ -27,7 +27,6 @@ public class Main {
 
          MongodbCloudCollector collector =new MongodbCloudCollector(data);
          TerminalController terminalController = new TerminalController(collector);
-
-         //start TerminalController;
+         terminalController.launch();
     }
 }

@@ -52,6 +52,7 @@ public class MongodbCloudCollector extends Thread{
             mongodbLocalWriter.join();
         }
 
+        System.out.println("MongodbCloudCollector a fechar.");
     }
 
     public MongodbCloudCollectorData getData() {
@@ -60,6 +61,12 @@ public class MongodbCloudCollector extends Thread{
 
     public void setData(MongodbCloudCollectorData data) {
         this.data = data;
+    }
+
+    public void killWriters(){
+        for(MongodbLocalWriter mongodbLocalWriter: writers){
+            mongodbLocalWriter.interrupt();
+        }
     }
 
     public static class MongodbCloudCollectorData {
