@@ -37,9 +37,10 @@ public class TerminalController{
         System.out.println("A sair do programa.");
     }
 
-    private void handleInputTerminal(String inputTerminal){
+    private void handleInputTerminal(String inputTerminal) throws IOException {
         switch (inputTerminal){
-            case "sair":{
+            case "sair":
+            case "": {
                 break;
             }
             case "ajuda":{
@@ -52,7 +53,7 @@ public class TerminalController{
                 break;
             }
             default:{
-                System.out.println("Comando não reconhecido por favor digitar \"ajuda\" para saber a lista de comandos.");
+                System.out.println(inputTerminal +" é um comando não reconhecido, por favor digitar \"ajuda\" para saber a lista de comandos.");
             }
         }
     }

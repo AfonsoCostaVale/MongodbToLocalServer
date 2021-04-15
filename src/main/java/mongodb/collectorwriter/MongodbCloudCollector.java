@@ -52,7 +52,6 @@ public class MongodbCloudCollector extends Thread{
             mongodbLocalWriter.join();
         }
 
-        System.out.println("MongodbCloudCollector a fechar.");
     }
 
     public MongodbCloudCollectorData getData() {

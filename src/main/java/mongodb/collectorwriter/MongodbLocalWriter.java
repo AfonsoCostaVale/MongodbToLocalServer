@@ -1,9 +1,6 @@
 package mongodb.collectorwriter;
 
-import com.mongodb.ErrorCategory;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoInterruptedException;
-import com.mongodb.MongoWriteException;
+import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -29,7 +26,7 @@ public class MongodbLocalWriter extends Thread{
 
             /*
             TODO
-            maybe compare the first ones to check if they deleted the first ones to save space
+                maybe compare the first ones to check if they deleted the first ones to save space
             */
 
             for(Document entry : collectionToRead.find().skip((int) collectionToWrite.count())) {
@@ -44,6 +41,8 @@ public class MongodbLocalWriter extends Thread{
 
             enterCheckMode();
         }catch(MongoInterruptedException e){
+
+        }catch(MongoTimeoutException e){
 
         }
     }
