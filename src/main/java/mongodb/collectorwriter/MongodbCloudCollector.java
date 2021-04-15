@@ -151,6 +151,18 @@ public class MongodbCloudCollector extends Thread{
             this.collections = collections;
         }
 
+        @Override
+        public String toString() {
+            return "MongodbCloudCollectorData{" +
+                    ", user='" + user + '\'' +
+                    ", databaseUser='" + databaseUser + '\'' +
+                    ", database='" + database + '\'' +
+                    ", ip='" + ip + '\'' +
+                    ", port=" + port +
+                    ", password=" + Arrays.toString(password) +
+                    ", collections=" + Arrays.toString(collections) +
+                    '}';
+        }
     }
 
 }

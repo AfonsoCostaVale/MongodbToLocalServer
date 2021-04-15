@@ -2,6 +2,8 @@ package config;
 
 import mongodb.collectorwriter.MongodbCloudCollector;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -67,15 +69,16 @@ public class ConfigManager {
 
     }
 
-    public static MongodbCloudCollector.MongodbCloudCollectorData readFromFile(String filename) throws NumberFormatException, IllegalArgumentException {
+    public static MongodbCloudCollector.MongodbCloudCollectorData readFromFile(String filename) throws NumberFormatException, IllegalArgumentException, FileNotFoundException {
         MongodbCloudCollector.MongodbCloudCollectorData data = new MongodbCloudCollector.MongodbCloudCollectorData();
-        Scanner scanner = new Scanner(filename);
-        String line;
+        Scanner scanner = new Scanner(new File(filename));
+        String line="";
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
-            if (!line.startsWith("//")) {
+            if (!line.startsWith("//") && !line.equals(filename)) {
                 String[] lineContent = line.split("=");
                 lineContent[1]=lineContent[1].trim().replace("\n","");
+                //TODO check if lineContent[1] is null
                 switch (lineContent[0]) {
                     case USER:
                         data.setUser(lineContent[1]);

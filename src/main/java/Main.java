@@ -2,6 +2,8 @@ import config.ConfigManager;
 import mongodb.collectorwriter.MongodbCloudCollector;
 import mongodb.collectorwriter.MongodbCloudCollector.MongodbCloudCollectorData;
 
+import java.io.FileNotFoundException;
+
 public class Main {
      public static void main(String[] args) {
          MongodbCloudCollectorData data = new MongodbCloudCollectorData(
@@ -14,7 +16,18 @@ public class Main {
                  new String[]{"sensorh1", "sensorh2", "sensorl1", "sensorl2", "sensort1", "sensort2"}
          );
 
-         ConfigManager.writeToFile("conf.ini",data);
-         //MongodbCloudCollector.collect();
+         //ConfigManager.writeToFile("conf.ini",data);
+         try {
+             MongodbCloudCollectorData readdata = ConfigManager.readFromFile("conf.ini");
+             ConfigManager.writeToFile("conf.ini",readdata);
+
+         } catch (FileNotFoundException e) {
+             e.printStackTrace();
+         }
+
+         MongodbCloudCollector collector =new MongodbCloudCollector(data);
+         TerminalController terminalController = new TerminalController(collector);
+
+         //start TerminalController;
     }
 }
