@@ -10,23 +10,21 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MongodbCloudCollector {
-    /*
-    final static String user = "aluno";
-    final static String databaseUsers = "admin";
-    final static String database = "sid2021";
-    final static String ip = "194.210.86.10";
-    final static int port = 27017;
-    final static char[] password = {'a', 'l', 'u', 'n', 'o'};
-    final static String[] collections = {"sensorh1", "sensorh2", "sensorl1", "sensorl2", "sensort1", "sensort2"};
-    */
+public class MongodbCloudCollector extends Thread{
+
     private MongodbCloudCollectorData data;
+    private ArrayList<MongodbLocalWriter> writers;
 
     public MongodbCloudCollector(MongodbCloudCollectorData data) {
         this.data = data;
+        writers = new ArrayList<>();
     }
 
-    public void collect() {
+    public void run(){
+        collect();
+    }
+
+    private void collect() {
         try {
             writeInfo(createClient().getDatabase(getData().getDatabase()));
         } catch (InterruptedException e) {
@@ -43,10 +41,6 @@ public class MongodbCloudCollector {
 
     private void writeInfo(MongoDatabase db) throws InterruptedException {
 
-        ArrayList<MongodbLocalWriter> writers = new ArrayList<>();
-
-        //   System.out.println("Started writing collections");
-
         for (String collection : data.getCollections()) {
             MongoCollection<Document> table = db.getCollection(collection);
             MongodbLocalWriter mongodbLocalWriter = new MongodbLocalWriter(collection, table);
@@ -54,10 +48,9 @@ public class MongodbCloudCollector {
             mongodbLocalWriter.start();
         }
 
-        /*
-        for(MongodbLocalWriter mongodbLocalWriter: writers){mongodbLocalWriter.join();}
-        System.out.println("Finished writing collections");
-        */
+        for(MongodbLocalWriter mongodbLocalWriter: writers){
+            mongodbLocalWriter.join();
+        }
 
     }
 
