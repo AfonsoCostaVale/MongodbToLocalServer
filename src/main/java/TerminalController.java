@@ -12,7 +12,7 @@ public class TerminalController{
         this.mongodbCloudCollector = mongodbCloudCollector;
     }
 
-    public void launch(){
+    public void launch() throws InterruptedException {
         System.out.println("Programa feito no âmbito na disciplina de PSID pelo grupo 12.\n" +
                 "Programa de terminal para gerir e sincronizar as importações do mongodb cloud para o local.\n" +
                 "Escrever \"ajuda\" para ver os comandos disponiveis.");
@@ -31,6 +31,7 @@ public class TerminalController{
 
         if(mongodbCloudCollector.isAlive()){
             mongodbCloudCollector.killWriters();
+            mongodbCloudCollector.join();
         }
 
         System.out.println("A sair do programa.");

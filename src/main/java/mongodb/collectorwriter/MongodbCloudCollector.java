@@ -96,7 +96,6 @@ public class MongodbCloudCollector extends Thread{
         private char[] password;
         private String[] collections;
 
-        public MongodbCloudCollectorData() {}
         public MongodbCloudCollectorData(String user,
                                          String databaseUser,
                                          String database,
