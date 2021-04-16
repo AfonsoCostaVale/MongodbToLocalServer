@@ -5,34 +5,38 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
-public class MongodbLocalWriter extends Thread{
-    private MongoClient mongoClient;
-    private MongoDatabase db;
-    private MongoCollection<Document> collectionToWrite;
-    private MongoCollection<Document> collectionToRead;
+public class MongodbLocalWriter extends Thread {
+    private final MongoClient localMongoClient;
+    private final MongoDatabase localDB;
+    private final MongoCollection<Document> collectionToWrite;
+    private final MongoCollection<Document> collectionToRead;
+    private final String collectionName;
 
-
-
-    protected MongodbLocalWriter(String collection, MongoCollection<Document> collectionToRead){
-        mongoClient = new MongoClient( "localhost" , 27017 );
-        db = mongoClient.getDatabase("sid");
-        this.collectionToWrite = db.getCollection(collection);
+    protected MongodbLocalWriter(String collection, MongoCollection<Document> collectionToRead) {
+        localMongoClient = new MongoClient("localhost", 27017);
+        localDB = localMongoClient.getDatabase("sid");
+        this.collectionToWrite = localDB.getCollection(collection);
         this.collectionToRead = collectionToRead;
+        collectionName = collectionToRead.getNamespace().getFullName();
+    }
+
+    public String getCollectionName() {
+        return collectionName;
     }
 
     public void run() {
-        try{
-            System.out.println("Started writing in "+ collectionToWrite.getNamespace().getFullName());
+        try {
+            System.out.println("Started writing in " + collectionToWrite.getNamespace().getFullName());
 
             /*
             TODO
                 maybe compare the first ones to check if they deleted the first ones to save space
             */
 
-            for(Document entry : collectionToRead.find().skip((int) collectionToWrite.count())) {
-                try{
+            for (Document entry : collectionToRead.find().skip((int) collectionToWrite.count())) {
+                try {
                     write(entry);
-                }catch (MongoWriteException e){
+                } catch (MongoWriteException e) {
                     if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
                         System.out.println("Found Duplicate");
                     }
@@ -40,34 +44,35 @@ public class MongodbLocalWriter extends Thread{
             }
 
             enterCheckMode();
-        }catch(MongoInterruptedException e){
+        } catch (MongoInterruptedException e) {
 
-        }catch(MongoTimeoutException e){
+        } catch (MongoTimeoutException e) {
 
         }
     }
 
-    private void enterCheckMode(){
+    private void enterCheckMode() {
 
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
 
-        while(true){
+        while (true) {
             try {
                 write(collectionToRead.find().skip((int) collectionToWrite.count()).first());
-                System.out.println("Added "+ collectionToWrite.getNamespace().getFullName());
-            }catch (MongoWriteException e){
+                System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
+            } catch (MongoWriteException e) {
                 if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
                     System.out.println("Found Duplicate");
                 }
-            }catch (IllegalArgumentException e){
+            } catch (IllegalArgumentException e) {
 
             }
         }
 
     }
 
-    protected void write(Document doc){
+    protected void write(Document doc) {
         collectionToWrite.insertOne(doc);
+
     }
 
 }

@@ -1,6 +1,6 @@
 package config;
 
-import mongodb.collectorwriter.MongodbCloudCollector;
+import mongodb.collectorwriter.MongodbCloudCollectorData;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,7 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
-import static mongodb.collectorwriter.MongodbCloudCollector.MongodbCloudCollectorData.*;
+import static mongodb.collectorwriter.MongodbCloudCollectorData.*;
 
 public class ConfigManager {
     public static final String DEFUALTFILENAME = "conf.ini";
@@ -23,7 +23,7 @@ public class ConfigManager {
                     "//Nome das coleções a clonar, separadas por \";\"\n"
             };
 
-    public static void writeToFile(String filename, MongodbCloudCollector.MongodbCloudCollectorData toWrite) {
+    public static void writeToFile(String filename, MongodbCloudCollectorData toWrite) {
         try (FileWriter myWriter = new FileWriter(filename)) {
             clearConfigFile(filename);
             myWriter.write(COMMENT[0]);
@@ -74,8 +74,8 @@ public class ConfigManager {
 
     }
 
-    public static MongodbCloudCollector.MongodbCloudCollectorData readFromFile(String filename) throws NumberFormatException, IllegalArgumentException, FileNotFoundException {
-        MongodbCloudCollector.MongodbCloudCollectorData data = DEFAULTCOLLECTORDATA;
+    public static MongodbCloudCollectorData readFromFile(String filename) throws NumberFormatException, IllegalArgumentException, FileNotFoundException {
+        MongodbCloudCollectorData data = DEFAULTCOLLECTORDATA;
         Scanner scanner = null;
         try {
             scanner = new Scanner(new File(filename));
