@@ -11,7 +11,8 @@ import java.util.Scanner;
 import static mongodb.collectorwriter.MongodbCloudCollectorData.*;
 
 public class ConfigManager {
-    public static final String DEFUALTFILENAME = "conf.ini";
+    private String filename;
+    public static final String DEFAULTFILENAME = "conf.ini";
     private static final String[] COMMENT =
             {
                     "//Nome do utilizador da base de dados\n",
@@ -23,33 +24,38 @@ public class ConfigManager {
                     "//Nome das coleções a clonar, separadas por \";\"\n"
             };
 
-    public static void writeToFile(String filename, MongodbCloudCollectorData toWrite) {
+    public ConfigManager(String filename) {
+        this.filename = filename;
+    }
+
+
+    public void writeToFile(MongodbCloudCollectorData dataToWrite) {
         try (FileWriter myWriter = new FileWriter(filename)) {
             clearConfigFile(filename);
             myWriter.write(COMMENT[0]);
-            myWriter.write(USER + "=" + toWrite.getUser() + "\n");
+            myWriter.write(ConfigParams.USER + "=" + dataToWrite.getUser() + "\n");
             myWriter.write(COMMENT[1]);
-            myWriter.write(DATABASEUSER + "=" + toWrite.getDatabaseUser() + "\n");
+            myWriter.write(ConfigParams.DATABASEUSER + "=" + dataToWrite.getDatabaseUser() + "\n");
             myWriter.write(COMMENT[2]);
-            myWriter.write(DATABASE + "=" + toWrite.getDatabase() + "\n");
+            myWriter.write(ConfigParams.DATABASE + "=" + dataToWrite.getDatabase() + "\n");
             myWriter.write(COMMENT[3]);
-            myWriter.write(IP + "=" + toWrite.getIp() + "\n");
+            myWriter.write(ConfigParams.IP + "=" + dataToWrite.getIp() + "\n");
             myWriter.write(COMMENT[4]);
-            myWriter.write(PORT + "=" + toWrite.getPort() + "\n");
+            myWriter.write(ConfigParams.PORT + "=" + dataToWrite.getPort() + "\n");
             myWriter.write(COMMENT[5]);
             String tempCharacter = "";
-            for (Character character : toWrite.getPassword()) {
+            for (Character character : dataToWrite.getPassword()) {
                 tempCharacter += (character);
             }
-            myWriter.write(PASSWORD + "=" + tempCharacter + "\n");
+            myWriter.write(ConfigParams.PASSWORD + "=" + tempCharacter + "\n");
             myWriter.write(COMMENT[6]);
 
             String tempCollections = "";
-            for (String collection : toWrite.getCollections()) {
+            for (String collection : dataToWrite.getCollections()) {
                 tempCollections += (collection + ";");
             }
             tempCollections = tempCollections.substring(0, tempCollections.length() - 1);
-            myWriter.write(COLLECTIONS + "=" + tempCollections + "\n");
+            myWriter.write(ConfigParams.COLLECTIONS + "=" + tempCollections + "\n");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -70,11 +76,11 @@ public class ConfigManager {
     }
 
     private static void createConfigFile() {
-        writeToFile(DEFUALTFILENAME, DEFAULTCOLLECTORDATA);
-
+        writeToFile(DEFAULTFILENAME, DEFAULTCOLLECTORDATA);
     }
 
-    public static MongodbCloudCollectorData readFromFile(String filename) throws NumberFormatException, IllegalArgumentException, FileNotFoundException {
+
+    public MongodbCloudCollectorData readFromFile() throws NumberFormatException, IllegalArgumentException, FileNotFoundException {
         MongodbCloudCollectorData data = DEFAULTCOLLECTORDATA;
         Scanner scanner = null;
         try {
@@ -92,25 +98,25 @@ public class ConfigManager {
                         continue;
                     }
                     switch (lineContent[0]) {
-                        case USER:
+                        case ConfigParams.USER.getLabel():
                             data.setUser(lineContent[1]);
                             break;
-                        case DATABASEUSER:
+                        case ConfigParams.DATABASEUSER:
                             data.setDatabaseUser(lineContent[1]);
                             break;
-                        case DATABASE:
+                        case ConfigParams.DATABASE:
                             data.setDatabase(lineContent[1]);
                             break;
-                        case IP:
+                        case ConfigParams.IP:
                             data.setIp(lineContent[1]);
                             break;
-                        case PORT:
+                        case ConfigParams.PORT:
                             data.setPort(Integer.parseInt(lineContent[1]));
                             break;
-                        case PASSWORD:
+                        case ConfigParams.PASSWORD:
                             data.setPassword(lineContent[1].toCharArray());
                             break;
-                        case COLLECTIONS:
+                        case ConfigParams.COLLECTIONS:
                             data.setCollections(lineContent[1].split(";"));
                             break;
                         default:
@@ -131,6 +137,5 @@ public class ConfigManager {
     //TODO
     public static void clearConfigFile(String filename) throws IOException {
         new FileWriter(filename, false).close();
-
     }
 }

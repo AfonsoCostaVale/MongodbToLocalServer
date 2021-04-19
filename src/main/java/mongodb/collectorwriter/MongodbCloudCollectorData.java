@@ -1,15 +1,9 @@
 package mongodb.collectorwriter;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class MongodbCloudCollectorData {
-    public static final String USER = "user";
-    public static final String DATABASEUSER = "databaseUsers";
-    public static final String DATABASE = "database";
-    public static final String IP = "ip";
-    public static final String PORT = "port";
-    public static final String PASSWORD = "password";
-    public static final String COLLECTIONS = "collections";
+
 
     public static final MongodbCloudCollectorData DEFAULTCOLLECTORDATA = new MongodbCloudCollectorData(
             "aluno",
@@ -99,6 +93,38 @@ public class MongodbCloudCollectorData {
 
     public void setCollections(String[] collections) {
         this.collections = collections;
+    }
+
+
+    //To change Config Settings
+    public void changeSetting(String setting2Change, List<String> newValue) {
+        String[] newValueArray = newValue.toArray(new String[0]);
+        String newSingleValue = "";
+        for(String value: newValue) {
+            newSingleValue+=value;
+            newSingleValue+=" ";
+        }
+        switch (setting2Change) {
+            case "user": {
+                setUser();
+            } case "databaseUser": {
+
+            } case "database": {
+
+
+            } case "ip": {
+
+            } case "port": {
+
+            } case "password": {
+
+            } case "collections": {
+
+            } default: {
+                System.out.println("Parametro de configuração desconhecido");
+                break;
+            }
+        }
     }
 
     @Override
