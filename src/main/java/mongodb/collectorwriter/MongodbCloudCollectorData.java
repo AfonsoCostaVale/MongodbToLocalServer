@@ -97,34 +97,30 @@ public class MongodbCloudCollectorData {
 
 
     //To change Config Settings
-    public void changeSetting(String setting2Change, List<String> newValue) {
-        String[] newValueArray = newValue.toArray(new String[0]);
+    public boolean changeSetting(String setting2Change, List<String> newValue) {
+        String[] newArrayValue = newValue.toArray(new String[0]);
         String newSingleValue = "";
         for(String value: newValue) {
             newSingleValue+=value;
             newSingleValue+=" ";
         }
-        switch (setting2Change) {
-            case "user": {
-                setUser();
-            } case "databaseUser": {
-
-            } case "database": {
-
-
-            } case "ip": {
-
-            } case "port": {
-
-            } case "password": {
-
-            } case "collections": {
-
-            } default: {
-                System.out.println("Parametro de configuração desconhecido");
-                break;
-            }
+        newSingleValue=newSingleValue.substring(0,newSingleValue.length()-1);
+        //O switch case nao ta a igualar as strings, se em caso de houver uma resolução a isso trocar de volta para o switch case
+        if(setting2Change.toLowerCase(Locale.ROOT).equals("user"))  setUser(newSingleValue);
+        else if(setting2Change.toLowerCase(Locale.ROOT).equals("databaseuser"))  setDatabaseUser(newSingleValue);
+        else if(setting2Change.toLowerCase(Locale.ROOT).equals("database"))  setDatabase(newSingleValue);
+        else if(setting2Change.toLowerCase(Locale.ROOT).equals("ip"))  setIp(newSingleValue);
+        else if(setting2Change.toLowerCase(Locale.ROOT).equals("port"))  setPort(Integer.parseInt(newSingleValue));
+        else if(setting2Change.toLowerCase(Locale.ROOT).equals("password")) {
+            char[] passChar = newSingleValue.toCharArray();
+            setPassword(passChar);
         }
+        else if(setting2Change.equals("collections"))  setCollections(newArrayValue);
+        else {
+            System.out.println("Parametro de configuração desconhecido");
+            return false;
+        }
+        return true;
     }
 
     @Override

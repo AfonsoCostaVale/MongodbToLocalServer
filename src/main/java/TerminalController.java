@@ -14,6 +14,7 @@ public class TerminalController{
     private static final String AJUDA = "ajuda";
     private static final String IMPORTAR = "importar";
     private static final String PARAR = "parar";
+    private static final String ALTERAR = "alterar";
     private static final String COMANDONAORECONHECIDO = "é um comando não reconhecido, por favor digitar \"ajuda\" para saber a lista de comandos.";
     private static final String ERRO_NO_INPUT_DA_INFORMAÇÃO = "Erro no input da informação.";
     private static final String COPYRIGHT = "Programa feito no âmbito na disciplina de PSID pelo grupo 12.\n" +
@@ -65,7 +66,7 @@ public class TerminalController{
         */
 
         //alterar user manuel
-        LinkedList<String> inputParts = new LinkedList<>(Arrays.asList( inputTerminal.split("-")));
+        LinkedList<String> inputParts = new LinkedList<>(Arrays.asList(inputTerminal.split("-")));
         String command = inputParts.pop();
         LinkedList<String> commandArgs=inputParts;
         //alterar -collections sensorh1 sensorh2
@@ -84,6 +85,9 @@ public class TerminalController{
                 break;
             } case PARAR: {
                 pararCloner(commandArgs);
+                break;
+            } case ALTERAR: {
+                alterarConfig(commandArgs);
                 break;
             }default:{
                 System.out.println(command + " " + COMANDONAORECONHECIDO);
@@ -107,8 +111,11 @@ public class TerminalController{
     }
 
     private void alterarConfig(List<String> alterarNewValue) {
-        String configCategory = alterarNewValue.remove(0).toLowerCase(Locale.ROOT);
-        mongodbCloudCollectorData.changeSetting(configCategory,alterarNewValue);
+        String commandArgs=alterarNewValue.get(0);
+        List<String> values2Use = new ArrayList<>(Arrays.asList(commandArgs.split(" ")));
+        String configCategory = values2Use.remove(0).toLowerCase(Locale.ROOT);
+        if(mongodbCloudCollectorData.changeSetting(configCategory,values2Use))
+            System.out.println("Foi alterado o campo: "  + configCategory);
     }
 
 
