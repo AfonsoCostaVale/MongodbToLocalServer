@@ -9,6 +9,7 @@ import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class MongodbCloudCollector extends Thread {
 
@@ -22,7 +23,7 @@ public class MongodbCloudCollector extends Thread {
 
     public boolean removeWriter(String collectionName) {
         for (MongodbLocalWriter writer : writers) {
-            if(writer.getCollectionName().equals(collectionName)){
+            if (writer.getCollectionName().equals(collectionName)) {
                 writer.interrupt();
                 return true;
             }
@@ -40,15 +41,14 @@ public class MongodbCloudCollector extends Thread {
         try {
             writeInfo(createClient().getDatabase(getData().getDatabase()));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             System.out.println("Could not write collections to local server");
         }
     }
 
     private MongoClient createClient() {
         MongoCredential credential = MongoCredential.createCredential(data.getUser(), data.getDatabaseUser(), data.getPassword());
-        MongoClient mongoClient = new MongoClient(new ServerAddress(data.getIp(), data.getPort()), Arrays.asList(credential));
-        return mongoClient;
+        return new MongoClient(new ServerAddress(data.getIp(), data.getPort()), Collections.singletonList(credential));
     }
 
     private void writeInfo(MongoDatabase db) throws InterruptedException {

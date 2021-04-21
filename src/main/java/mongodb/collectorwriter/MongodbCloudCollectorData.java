@@ -4,17 +4,6 @@ import java.util.*;
 
 public class MongodbCloudCollectorData {
 
-
-    public static final MongodbCloudCollectorData DEFAULTCOLLECTORDATA = new MongodbCloudCollectorData(
-            "aluno",
-            "admin",
-            "sid2021",
-            "194.210.86.10",
-            27017,
-            new char[]{'a', 'l', 'u', 'n', 'o'},
-            new String[]{"sensorh1", "sensorh2", "sensorl1", "sensorl2", "sensort1", "sensort2"}
-    );
-
     private String user;
     private String databaseUser;
     private String database;
@@ -125,14 +114,15 @@ public class MongodbCloudCollectorData {
 
     @Override
     public String toString() {
+        String spacer = "    ";
         return "MongodbCloudCollectorData{" +
-                ", user='" + user + '\'' +
-                ", databaseUser='" + databaseUser + '\'' +
-                ", database='" + database + '\'' +
-                ", ip='" + ip + '\'' +
-                ", port=" + port +
-                ", password=" + Arrays.toString(password) +
-                ", collections=" + Arrays.toString(collections) +
-                '}';
+                "\n  "+spacer+"  user='" + user + '\'' +
+                "\n  "+spacer+"  databaseUser='" + databaseUser + '\'' +
+                "\n  "+spacer+"  database='" + database + '\'' +
+                "\n  "+spacer+"  ip='" + ip + '\'' +
+                "\n  "+spacer+"  port=" + port +
+                "\n  "+spacer+"  password=" + Arrays.toString(password) +
+                "\n  "+spacer+"  collections=" + Arrays.toString(collections) +
+                "\n}";
     }
 }

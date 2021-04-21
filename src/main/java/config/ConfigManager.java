@@ -6,13 +6,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Scanner;
 
-import static mongodb.collectorwriter.MongodbCloudCollectorData.*;
-
 public class ConfigManager {
-    private String filename;
     public static final String DEFAULTFILENAME = "conf.ini";
+    public final static  MongodbCloudCollectorData DEFAULTCOLLECTORDATA = new MongodbCloudCollectorData(
+            "aluno",
+            "admin",
+            "sid2021",
+            "194.210.86.10",
+            27017,
+            new char[]{'a', 'l', 'u', 'n', 'o'},
+            new String[]{"sensorh1", "sensorh2", "sensorl1", "sensorl2", "sensort1", "sensort2"}
+    );
     private static final String[] COMMENT =
             {
                     "//Nome do utilizador da base de dados\n",
@@ -24,18 +31,23 @@ public class ConfigManager {
                     "//Nome das coleções a clonar, separadas por \";\"\n"
             };
 
+    public String getFilename() {
+        return filename;
+    }
+
+    private final String filename;
+
     public ConfigManager(String filename) {
         this.filename = filename;
     }
 
-
-    public void writeToFile(MongodbCloudCollectorData dataToWrite) {
+    public static void writeToFile(String filename, MongodbCloudCollectorData dataToWrite) {
         try (FileWriter myWriter = new FileWriter(filename)) {
             clearConfigFile(filename);
             myWriter.write(COMMENT[0]);
             myWriter.write(ConfigParams.USER + "=" + dataToWrite.getUser() + "\n");
             myWriter.write(COMMENT[1]);
-            myWriter.write(ConfigParams.DATABASEUSER + "=" + dataToWrite.getDatabaseUser() + "\n");
+            myWriter.write(ConfigParams.DATABASEUSERS + "=" + dataToWrite.getDatabaseUser() + "\n");
             myWriter.write(COMMENT[2]);
             myWriter.write(ConfigParams.DATABASE + "=" + dataToWrite.getDatabase() + "\n");
             myWriter.write(COMMENT[3]);
@@ -75,12 +87,7 @@ public class ConfigManager {
 
     }
 
-    private static void createConfigFile() {
-        writeToFile(DEFAULTFILENAME, DEFAULTCOLLECTORDATA);
-    }
-
-
-    public MongodbCloudCollectorData readFromFile() throws NumberFormatException, IllegalArgumentException, FileNotFoundException {
+    public static MongodbCloudCollectorData readFromFile(String filename) throws IllegalArgumentException, FileNotFoundException {
         MongodbCloudCollectorData data = DEFAULTCOLLECTORDATA;
         Scanner scanner = null;
         try {
@@ -97,26 +104,26 @@ public class ConfigManager {
                     } else {
                         continue;
                     }
-                    switch (lineContent[0]) {
-                        case ConfigParams.USER.getLabel():
+                    switch (ConfigParams.valueOf(lineContent[0].toUpperCase(Locale.ROOT))) {
+                        case USER:
                             data.setUser(lineContent[1]);
                             break;
-                        case ConfigParams.DATABASEUSER:
+                        case DATABASEUSERS:
                             data.setDatabaseUser(lineContent[1]);
                             break;
-                        case ConfigParams.DATABASE:
+                        case DATABASE:
                             data.setDatabase(lineContent[1]);
                             break;
-                        case ConfigParams.IP:
+                        case IP:
                             data.setIp(lineContent[1]);
                             break;
-                        case ConfigParams.PORT:
+                        case PORT:
                             data.setPort(Integer.parseInt(lineContent[1]));
                             break;
-                        case ConfigParams.PASSWORD:
+                        case PASSWORD:
                             data.setPassword(lineContent[1].toCharArray());
                             break;
-                        case ConfigParams.COLLECTIONS:
+                        case COLLECTIONS:
                             data.setCollections(lineContent[1].split(";"));
                             break;
                         default:
@@ -129,7 +136,7 @@ public class ConfigManager {
 
             return data;
         } catch (FileNotFoundException e) {
-            createConfigFile();
+            createConfigFile(filename);
             return DEFAULTCOLLECTORDATA;
         }
     }
@@ -137,5 +144,21 @@ public class ConfigManager {
     //TODO
     public static void clearConfigFile(String filename) throws IOException {
         new FileWriter(filename, false).close();
+    }
+
+    private static void createConfigFile(String filename) {
+        writeToFile(filename, DEFAULTCOLLECTORDATA);
+    }
+
+    public void writeToFile(MongodbCloudCollectorData dataToWrite) {
+        writeToFile(this.filename, dataToWrite);
+    }
+
+    private void createConfigFile() {
+        writeToFile(DEFAULTCOLLECTORDATA);
+    }
+
+    public MongodbCloudCollectorData readFromFile() throws IllegalArgumentException, FileNotFoundException {
+        return readFromFile(this.filename);
     }
 }

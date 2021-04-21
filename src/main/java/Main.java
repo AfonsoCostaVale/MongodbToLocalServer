@@ -1,13 +1,11 @@
-import mongodb.collectorwriter.MongodbCloudCollector;
-
 import java.io.FileNotFoundException;
 
-import static mongodb.collectorwriter.MongodbCloudCollectorData.DEFAULTCOLLECTORDATA;
+import static config.ConfigManager.DEFAULTFILENAME;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException, FileNotFoundException {
-        MongodbCloudCollector collector =new MongodbCloudCollector(DEFAULTCOLLECTORDATA);
-        TerminalController terminalController = new TerminalController(collector);
+        //MongodbCloudCollector collector =new MongodbCloudCollector(DEFAULTCOLLECTORDATA);
+        TerminalController terminalController = new TerminalController(DEFAULTFILENAME);
         terminalController.launch();
     }
 

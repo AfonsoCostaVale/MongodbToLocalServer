@@ -1,24 +1,25 @@
 package config;
 
-public  enum ConfigParams {
+public enum ConfigParams {
 
-         USER("user"),
-                DATABASEUSER ("databaseUsers"),
-                DATABASE ("database"),
-                IP ("ip"),
-                PORT ("port"),
-                PASSWORD ("password"),
-                COLLECTIONS ("collections");
+    USER("user"),
+    DATABASEUSERS("databaseusers"),
+    DATABASE("database"),
+    IP("ip"),
+    PORT("port"),
+    PASSWORD("password"),
+    COLLECTIONS("collections");
 
-        private String label;
+    private final String label;
 
 
-        public final String getLabel(){
-            return this.label;
-        }
-        private ConfigParams(String label){
-            this.label = label;
-        }
+    ConfigParams(String label) {
+        this.label = label;
+    }
+
+    public final String getLabel() {
+        return this.label;
+    }
 
     @Override
     public String toString() {
