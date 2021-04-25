@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static config.ConfigManager.DEFAULTCOLLECTORDATA;
-
 public class TerminalController{
 
     private static final String SAIR = "sair";
@@ -113,14 +111,12 @@ public class TerminalController{
     }
 
     private void dispatchedReset() {
-        //TODO erro, o defaultCollectorDATA está a copiar os parametros do collectorData instanciado nesta classe
-        MongodbCloudCollectorData defaultdata = ConfigManager.DEFAULTCOLLECTORDATA;
-        this.mongodbCloudCollectorData=defaultdata;
+        this.mongodbCloudCollectorData= new MongodbCloudCollectorData();
         System.out.println("Novas configurações:\n"+this.mongodbCloudCollectorData);
     }
 
     private void dispatchedShowDefault() {
-        System.out.println(DEFAULTCOLLECTORDATA);
+        System.out.println(new MongodbCloudCollectorData());
     }
 
     private void dispatchedSave() {

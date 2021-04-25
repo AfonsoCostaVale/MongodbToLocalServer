@@ -11,15 +11,8 @@ import java.util.Scanner;
 
 public class ConfigManager {
     public static final String DEFAULTFILENAME = "conf.ini";
-    public final static  MongodbCloudCollectorData DEFAULTCOLLECTORDATA = new MongodbCloudCollectorData(
-            "aluno",
-            "admin",
-            "sid2021",
-            "194.210.86.10",
-            27017,
-            new char[]{'a', 'l', 'u', 'n', 'o'},
-            new String[]{"sensorh1", "sensorh2", "sensorl1", "sensorl2", "sensort1", "sensort2"}
-    );
+
+
     private static final String[] COMMENT =
             {
                     "//Nome do utilizador da base de dados\n",
@@ -88,7 +81,7 @@ public class ConfigManager {
     }
 
     public static MongodbCloudCollectorData readFromFile(String filename) throws IllegalArgumentException, FileNotFoundException {
-        MongodbCloudCollectorData data = DEFAULTCOLLECTORDATA;
+        MongodbCloudCollectorData data = new MongodbCloudCollectorData();
         Scanner scanner = null;
         try {
             scanner = new Scanner(new File(filename));
@@ -137,7 +130,7 @@ public class ConfigManager {
             return data;
         } catch (FileNotFoundException e) {
             createConfigFile(filename);
-            return DEFAULTCOLLECTORDATA;
+            return new MongodbCloudCollectorData();
         }
     }
 
@@ -147,7 +140,7 @@ public class ConfigManager {
     }
 
     private static void createConfigFile(String filename) {
-        writeToFile(filename, DEFAULTCOLLECTORDATA);
+        writeToFile(filename, new MongodbCloudCollectorData());
     }
 
     public void writeToFile(MongodbCloudCollectorData dataToWrite) {
@@ -155,7 +148,7 @@ public class ConfigManager {
     }
 
     private void createConfigFile() {
-        writeToFile(DEFAULTCOLLECTORDATA);
+        writeToFile(new MongodbCloudCollectorData());
     }
 
     public MongodbCloudCollectorData readFromFile() throws IllegalArgumentException, FileNotFoundException {

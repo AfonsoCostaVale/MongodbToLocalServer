@@ -1,6 +1,8 @@
 package mongodb.collectorwriter;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 public class MongodbCloudCollectorData {
 
@@ -26,6 +28,16 @@ public class MongodbCloudCollectorData {
         this.port = port;
         this.password = password;
         this.collections = collections;
+    }
+
+    public MongodbCloudCollectorData() {
+        this.user = "aluno";
+        this.databaseUser = "admin";
+        this.database = "sid2021";
+        this.ip = "194.210.86.10";
+        this.port = 27017;
+        this.password = new char[]{'a', 'l', 'u', 'n', 'o'};
+        this.collections = new String[]{"sensorh1", "sensorh2", "sensorl1", "sensorl2", "sensort1", "sensort2"};
     }
 
     public String getUser() {
@@ -127,13 +139,13 @@ public class MongodbCloudCollectorData {
     public String toString() {
         String spacer = "    ";
         return "MongodbCloudCollectorData{" +
-                "\n  "+spacer+"  user='" + user + '\'' +
-                "\n  "+spacer+"  databaseUser='" + databaseUser + '\'' +
-                "\n  "+spacer+"  database='" + database + '\'' +
-                "\n  "+spacer+"  ip='" + ip + '\'' +
-                "\n  "+spacer+"  port=" + port +
-                "\n  "+spacer+"  password=" + Arrays.toString(password) +
-                "\n  "+spacer+"  collections=" + Arrays.toString(collections) +
+                "\n  " + spacer + "  user='" + user + '\'' +
+                "\n  " + spacer + "  databaseUser='" + databaseUser + '\'' +
+                "\n  " + spacer + "  database='" + database + '\'' +
+                "\n  " + spacer + "  ip='" + ip + '\'' +
+                "\n  " + spacer + "  port=" + port +
+                "\n  " + spacer + "  password=" + Arrays.toString(password) +
+                "\n  " + spacer + "  collections=" + Arrays.toString(collections) +
                 "\n}";
     }
 }
