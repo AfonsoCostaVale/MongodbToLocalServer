@@ -89,27 +89,38 @@ public class MongodbCloudCollectorData {
     public boolean changeSetting(String setting2Change, List<String> newValue) {
         String[] newArrayValue = newValue.toArray(new String[0]);
         String newSingleValue = "";
-        for(String value: newValue) {
-            newSingleValue+=value;
-            newSingleValue+=" ";
+        if(!newValue.isEmpty()){
+            for(String value: newValue) {
+                newSingleValue+=value;
+                newSingleValue+=" ";
+            }
+            newSingleValue=newSingleValue.substring(0,newSingleValue.length()-1);
+            //O switch case nao ta a igualar as strings, se em caso de houver uma resolução a isso trocar de volta para o switch case
+            if(setting2Change.toLowerCase(Locale.ROOT).equals("user"))  setUser(newSingleValue);
+            else if(setting2Change.toLowerCase(Locale.ROOT).equals("databaseuser"))  setDatabaseUser(newSingleValue);
+            else if(setting2Change.toLowerCase(Locale.ROOT).equals("database"))  setDatabase(newSingleValue);
+            else if(setting2Change.toLowerCase(Locale.ROOT).equals("ip"))  setIp(newSingleValue);
+            else if(setting2Change.toLowerCase(Locale.ROOT).equals("port"))  {
+                try{
+                    setPort(Integer.parseInt(newSingleValue));
+                } catch (NumberFormatException e) {
+                    System.out.println("Não foi dado um número");
+                    return false;
+                }
+            }
+            else if(setting2Change.toLowerCase(Locale.ROOT).equals("password")) {
+                char[] passChar = newSingleValue.toCharArray();
+                setPassword(passChar);
+            }
+            else if(setting2Change.equals("collections"))  setCollections(newArrayValue);
+            else {
+                System.out.println("Parametro de configuração desconhecido");
+                return false;
+            }
+            return true;
         }
-        newSingleValue=newSingleValue.substring(0,newSingleValue.length()-1);
-        //O switch case nao ta a igualar as strings, se em caso de houver uma resolução a isso trocar de volta para o switch case
-        if(setting2Change.toLowerCase(Locale.ROOT).equals("user"))  setUser(newSingleValue);
-        else if(setting2Change.toLowerCase(Locale.ROOT).equals("databaseuser"))  setDatabaseUser(newSingleValue);
-        else if(setting2Change.toLowerCase(Locale.ROOT).equals("database"))  setDatabase(newSingleValue);
-        else if(setting2Change.toLowerCase(Locale.ROOT).equals("ip"))  setIp(newSingleValue);
-        else if(setting2Change.toLowerCase(Locale.ROOT).equals("port"))  setPort(Integer.parseInt(newSingleValue));
-        else if(setting2Change.toLowerCase(Locale.ROOT).equals("password")) {
-            char[] passChar = newSingleValue.toCharArray();
-            setPassword(passChar);
-        }
-        else if(setting2Change.equals("collections"))  setCollections(newArrayValue);
-        else {
-            System.out.println("Parametro de configuração desconhecido");
-            return false;
-        }
-        return true;
+        System.out.println("Valor vazio");
+        return false;
     }
 
     @Override
