@@ -4,25 +4,25 @@ import org.eclipse.paho.client.mqttv3.*;
 
 import static MQTT.GeneralMqttVariables.*;
 
-public class MQTTWriter {
+public class MQTTReader {
 
     MqttClient sampleClient;
     MqttConnectOptions connOpts;
 
-    public MQTTWriter(String broker, String clientID, MqttClientPersistence persistence) throws MqttException {
+    public MQTTReader(String broker, String clientID, MqttClientPersistence persistence) throws MqttException {
         sampleClient = new MqttClient(broker, clientID, persistence);
         connOpts = new MqttConnectOptions();
         connOpts.setAutomaticReconnect(true);
         connOpts.setCleanSession(true);
-
     }
 
     public static void main(String[] args) {
         try {
-            MQTTWriter writer = new MQTTWriter(BROKER, CLIENT_ID, PERSISTENCE);
-            writer.connect();
-            writer.sendMessage(CONTENT, QOS, TOPIC);
-            writer.disconnect();
+            MQTTReader reader = new MQTTReader(BROKER, CLIENT_ID, PERSISTENCE);
+            reader.connect();
+            reader.subscribe();
+            reader.unsubscribe();
+            reader.disconnect();
         } catch (MqttException me) {
             System.out.println("reason " + me.getReasonCode());
             System.out.println("msg " + me.getMessage());
@@ -40,19 +40,23 @@ public class MQTTWriter {
         System.out.println("Connected");
     }
 
-    public void sendMessage(String content, int qos, String topic) throws MqttException {
-        System.out.println("Publishing message: " + content);
 
-        MqttMessage message = new MqttMessage(content.getBytes());
-        message.setQos(qos);
-        sampleClient.publish(topic, message);
+    public void subscribe() throws MqttException {
+        System.out.println("Subscribing to broker: " + BROKER);
+        sampleClient.subscribe(TOPIC,QOS,(s, mqttMessage) -> System.out.println(mqttMessage));
 
-        System.out.println("Message published");
+        System.out.println("Subscribed");
     }
+
+    private void unsubscribe() throws MqttException {
+        sampleClient.unsubscribe(TOPIC);
+    }
+
 
     public void disconnect() throws MqttException {
         sampleClient.disconnect();
         System.out.println("Disconnected");
 
     }
+
 }
