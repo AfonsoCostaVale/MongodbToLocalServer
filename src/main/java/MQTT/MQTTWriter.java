@@ -1,12 +1,16 @@
 package MQTT;
 
+import mongodb.collectorwriter.MongodbCloudCollectorData;
 import org.eclipse.paho.client.mqttv3.*;
+
+import java.io.*;
+import java.util.Scanner;
 
 import static MQTT.GeneralMqttVariables.*;
 
 public class MQTTWriter {
 
-    MqttClient sampleClient;
+    IMqttClient sampleClient;
     MqttConnectOptions connOpts;
 
     public MQTTWriter(String broker, String clientID, MqttClientPersistence persistence) throws MqttException {
@@ -17,11 +21,31 @@ public class MQTTWriter {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         try {
             MQTTWriter writer = new MQTTWriter(BROKER, CLIENT_ID, PERSISTENCE);
             writer.connect();
-            writer.sendMessage(CONTENT, QOS, TOPIC);
+            //writer.sendMessage(CONTENT, QOS, TOPIC);
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(new MongodbCloudCollectorData());
+            oos.flush();
+            byte [] data = bos.toByteArray();
+
+            MqttMessage message = new MqttMessage(data);
+            message.setQos(QOS);
+            writer.sampleClient.publish(TOPIC, message);
+            System.out.println("message sent:" + message);
+
+            System.out.println("You can start sending your own messages:");
+            String input = "";
+            while(!input.equals("quit")){
+                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+                input = reader.readLine();
+                writer.sendMessage(input, QOS, TOPIC);
+            }
+
             writer.disconnect();
         } catch (MqttException me) {
             System.out.println("reason " + me.getReasonCode());

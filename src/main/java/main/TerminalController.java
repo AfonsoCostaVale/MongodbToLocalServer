@@ -1,3 +1,5 @@
+package main;
+
 import config.ConfigManager;
 import mongodb.collectorwriter.MongodbCloudCollector;
 import mongodb.collectorwriter.MongodbCloudCollectorData;
@@ -30,7 +32,7 @@ public class TerminalController{
     private MongodbCloudCollectorData mongodbCloudCollectorData;
     private ConfigManager configManager;
 
-    //public TerminalController(String filename,MongodbCloudCollector mongodbCloudCollector) throws FileNotFoundException {
+    //public main.TerminalController(String filename,MongodbCloudCollector mongodbCloudCollector) throws FileNotFoundException {
     public TerminalController(String filename) throws FileNotFoundException {
         this.configManager = new ConfigManager(filename);
         mongodbCloudCollectorData = configManager.readFromFile();

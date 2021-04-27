@@ -1,10 +1,14 @@
 package MQTT;
 
+import mongodb.collectorwriter.MongodbCloudCollectorData;
 import org.eclipse.paho.client.mqttv3.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 
 import static MQTT.GeneralMqttVariables.*;
 
-public class MQTTReader {
+public class MQTTReader implements MqttCallback{
 
     MqttClient sampleClient;
     MqttConnectOptions connOpts;
@@ -14,6 +18,7 @@ public class MQTTReader {
         connOpts = new MqttConnectOptions();
         connOpts.setAutomaticReconnect(true);
         connOpts.setCleanSession(true);
+        connOpts.setConnectionTimeout(10);
     }
 
     public static void main(String[] args) {
@@ -21,8 +26,9 @@ public class MQTTReader {
             MQTTReader reader = new MQTTReader(BROKER, CLIENT_ID, PERSISTENCE);
             reader.connect();
             reader.subscribe();
-            reader.unsubscribe();
-            reader.disconnect();
+
+            //reader.unsubscribe();
+            //reader.disconnect();
         } catch (MqttException me) {
             System.out.println("reason " + me.getReasonCode());
             System.out.println("msg " + me.getMessage());
@@ -43,7 +49,8 @@ public class MQTTReader {
 
     public void subscribe() throws MqttException {
         System.out.println("Subscribing to broker: " + BROKER);
-        sampleClient.subscribe(TOPIC,QOS,(s, mqttMessage) -> System.out.println(mqttMessage));
+        sampleClient.setCallback(this);
+        sampleClient.subscribe(TOPIC);
 
         System.out.println("Subscribed");
     }
@@ -59,4 +66,26 @@ public class MQTTReader {
 
     }
 
+    @Override
+    public void connectionLost(Throwable throwable) {
+        System.out.println("ConectionLost\n"+throwable);
+
+    }
+
+    @Override
+    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+        byte[] payload = mqttMessage.getPayload();
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(payload);
+        ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+        MongodbCloudCollectorData receivedData = (MongodbCloudCollectorData) objectInputStream.readObject();
+        System.out.println("Recieved:"+receivedData);
+
+        //System.out.println("Recieved:"+mqttMessage);
+    }
+
+    @Override
+    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+        System.out.println("deliveryComplete\n"+iMqttDeliveryToken);
+
+    }
 }

@@ -1,3 +1,5 @@
+package main;
+
 import java.io.FileNotFoundException;
 
 import static config.ConfigManager.DEFAULTFILENAME;

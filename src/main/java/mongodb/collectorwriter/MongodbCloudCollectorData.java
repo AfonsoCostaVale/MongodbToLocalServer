@@ -1,10 +1,11 @@
 package mongodb.collectorwriter;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class MongodbCloudCollectorData {
+public class MongodbCloudCollectorData implements Serializable {
 
     private String user;
     private String databaseUser;
