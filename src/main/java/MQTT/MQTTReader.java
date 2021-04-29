@@ -5,6 +5,7 @@ import org.eclipse.paho.client.mqttv3.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
+import java.util.Arrays;
 
 import static MQTT.GeneralMqttVariables.*;
 
@@ -77,10 +78,10 @@ public class MQTTReader implements MqttCallback{
         byte[] payload = mqttMessage.getPayload();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(payload);
         ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-        MongodbCloudCollectorData receivedData = (MongodbCloudCollectorData) objectInputStream.readObject();
-        System.out.println("Recieved:"+receivedData);
+        String receivedData = (String) objectInputStream.readObject();
+        System.out.println("Received:"+ receivedData);
 
-        //System.out.println("Recieved:"+mqttMessage);
+        //System.out.println("Received:"+mqttMessage);
     }
 
     @Override

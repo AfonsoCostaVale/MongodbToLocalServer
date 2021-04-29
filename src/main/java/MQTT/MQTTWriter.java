@@ -1,8 +1,11 @@
 package MQTT;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import mongodb.collectorwriter.MongodbCloudCollectorData;
 import org.eclipse.paho.client.mqttv3.*;
 
+import javax.swing.text.Document;
 import java.io.*;
 import java.util.Scanner;
 
@@ -29,7 +32,7 @@ public class MQTTWriter {
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);
-            oos.writeObject(new MongodbCloudCollectorData());
+            oos.writeObject(new MongodbCloudCollectorData().getCollections());
             oos.flush();
             byte [] data = bos.toByteArray();
 
@@ -64,10 +67,16 @@ public class MQTTWriter {
         System.out.println("Connected");
     }
 
-    public void sendMessage(String content, int qos, String topic) throws MqttException {
+    public void sendMessage(String content, int qos, String topic) throws MqttException, IOException {
         System.out.println("Publishing message: " + content);
 
-        MqttMessage message = new MqttMessage(content.getBytes());
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(content);
+        oos.flush();
+        byte [] data = bos.toByteArray();
+
+        MqttMessage message = new MqttMessage(data);
         message.setQos(qos);
         sampleClient.publish(topic, message);
 
