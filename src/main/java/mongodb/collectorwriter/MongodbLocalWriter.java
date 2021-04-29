@@ -67,13 +67,11 @@ public class MongodbLocalWriter extends Thread {
     private void enterCheckMode() throws MqttException {
 
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
-        MQTTWriter mqttWriter= new MQTTWriter(GeneralMqttVariables.BROKER,GeneralMqttVariables.CLIENT_ID,GeneralMqttVariables.PERSISTENCE);
-        mqttWriter.connect();
         while (true) {
             try {
                 Document documentToWrite = collectionToRead.find().skip((int) collectionToWrite.count()).first();
                 write(documentToWrite);
-                mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
+               // mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
                 System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
             } catch (MongoWriteException e) {
                 if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
@@ -81,8 +79,6 @@ public class MongodbLocalWriter extends Thread {
                 }
             } catch (IllegalArgumentException e) {
 
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
 
