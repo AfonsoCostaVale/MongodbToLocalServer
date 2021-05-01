@@ -45,8 +45,13 @@ public class MongodbCloudCollector extends Thread {
         } catch (InterruptedException e) {
             //e.printStackTrace();
             System.out.println("Could not write collections to local server");
-        } catch (MqttException e) {
-            e.printStackTrace();
+        } catch (MqttException me) {
+            System.out.println("reason " + me.getReasonCode());
+            System.out.println("msg " + me.getMessage());
+            System.out.println("loc " + me.getLocalizedMessage());
+            System.out.println("cause " + me.getCause());
+            System.out.println("excep " + me);
+            me.printStackTrace();
         }
     }
 

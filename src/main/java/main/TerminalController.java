@@ -49,8 +49,10 @@ public class TerminalController{
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                 inputTerminal = reader.readLine().trim();
                 handleInputTerminal(inputTerminal);
-            } catch (IOException e) {
+            } catch (IOException ioException) {
                 System.out.println(ERRO_NO_INPUT_DA_INFORMACAO);
+            }catch(Exception exception){
+                System.out.println("Erro inesperado");
             }
         }
 

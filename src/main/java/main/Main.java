@@ -14,5 +14,6 @@ public class Main {
     /*TODO
         Arranjar maneira de não aparecer os erros (Ajudar a ver)
         CommandLine mais extensa(com mais comandos e edição de parametros)
+        Problema se fizermos DROP a database sid o programa spamma Added sid.sensort1 infinitamente
     */
 }
