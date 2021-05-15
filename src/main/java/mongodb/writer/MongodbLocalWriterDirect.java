@@ -1,77 +1,65 @@
-package mongodb.collectorwriter;
+package mongodb.writer;
 
-import MQTT.GeneralMqttVariables;
-import MQTT.MQTTWriter;
 import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import sql.CulturaDB;
 
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-public class MongodbLocalWriter extends Thread {
-    private final MongoClient localMongoClient;
-    private final MongoDatabase localDB;
-    private final MongoCollection<Document> collectionToWrite;
-    private final MongoCollection<Document> collectionToRead;
-    private final String collectionName;
-    private final MQTTWriter mqttWriter;
+public class MongodbLocalWriterDirect extends MongodbLocalWriter {
 
-    protected MongodbLocalWriter(String collection, MongoCollection<Document> collectionToRead,MQTTWriter mqttWriter) {
+    private final Connection connection;
+
+    public MongodbLocalWriterDirect(String collection, MongoCollection<Document> collectionToRead, Connection connection) {
         localMongoClient = new MongoClient("localhost", 27017);
         localDB = localMongoClient.getDatabase("sid");
         this.collectionToWrite = localDB.getCollection(collection);
         this.collectionToRead = collectionToRead;
         collectionName = collectionToRead.getNamespace().getFullName();
-        this.mqttWriter = mqttWriter;
-    }
-
-    public String getCollectionName() {
-        return collectionName;
+        this.connection = connection;
     }
 
     public void run() {
         try {
             System.out.println("Started writing in " + collectionToWrite.getNamespace().getFullName());
 
-
             for (Document entry : collectionToRead.find().skip((int) collectionToWrite.count())) {
                 try {
                     write(entry);
-                    mqttWriter.sendMessage(entry.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
+                    CulturaDB.insertMedicao(entry.toString(), this.connection);
                 } catch (MongoWriteException e) {
                     if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
                         System.out.println("Found Duplicate");
                     }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
                 }
             }
-            mqttWriter.disconnect();
 
             try {
                 enterCheckMode();
             } catch (MqttException e) {
                 e.printStackTrace();
             }
+
         } catch (MongoInterruptedException e) {
-
-        } catch (MongoTimeoutException e) {
-
-        } catch (MqttException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (MongoTimeoutException e) {
             e.printStackTrace();
         }
     }
 
-    private void enterCheckMode() throws MqttException {
+    protected void enterCheckMode() throws MqttException {
 
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
         while (true) {
             try {
                 Document documentToWrite = collectionToRead.find().skip((int) collectionToWrite.count()).first();
                 write(documentToWrite);
-               // mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
+                // mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
                 System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
             } catch (MongoWriteException e) {
                 if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
@@ -81,11 +69,6 @@ public class MongodbLocalWriter extends Thread {
 
             }
         }
-
-    }
-
-    protected void write(Document doc) {
-        collectionToWrite.insertOne(doc);
 
     }
 

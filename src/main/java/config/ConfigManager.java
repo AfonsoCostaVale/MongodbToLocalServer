@@ -1,6 +1,6 @@
 package config;
 
-import mongodb.collectorwriter.MongodbCloudCollectorData;
+import mongodb.collector.MongodbCloudCollectorData;
 
 import java.io.File;
 import java.io.FileNotFoundException;

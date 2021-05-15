@@ -1,4 +1,4 @@
-package mongodb.collectorwriter;
+package mongodb.collector;
 
 import java.io.Serializable;
 import java.util.Arrays;

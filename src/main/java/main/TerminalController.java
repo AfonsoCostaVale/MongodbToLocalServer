@@ -1,8 +1,8 @@
 package main;
 
 import config.ConfigManager;
-import mongodb.collectorwriter.MongodbCloudCollector;
-import mongodb.collectorwriter.MongodbCloudCollectorData;
+import mongodb.collector.MongodbCloudCollector;
+import mongodb.collector.MongodbCloudCollectorData;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

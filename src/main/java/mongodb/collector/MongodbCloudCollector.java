@@ -1,7 +1,9 @@
-package mongodb.collectorwriter;
+package mongodb.collector;
 
-import MQTT.GeneralMqttVariables;
-import MQTT.MQTTWriter;
+import mongodb.writer.MongodbLocalWriter;
+import mongodb.writer.MongodbLocalWriterMQTT;
+import mqtt.GeneralMqttVariables;
+import mqtt.MQTTWriter;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
@@ -66,7 +68,7 @@ public class MongodbCloudCollector extends Thread {
         mqttWriter.connect();
         for (String collection : data.getCollections()) {
             MongoCollection<Document> table = db.getCollection(collection);
-            MongodbLocalWriter mongodbLocalWriter = new MongodbLocalWriter(collection, table,mqttWriter);
+            MongodbLocalWriter mongodbLocalWriter = new MongodbLocalWriterMQTT(collection, table,mqttWriter);
             writers.add(mongodbLocalWriter);
             mongodbLocalWriter.start();
         }

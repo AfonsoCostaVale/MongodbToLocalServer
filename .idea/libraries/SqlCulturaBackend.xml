@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SqlCulturaBackend">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../SqlCulturaBackend/out/artifacts/SqlCulturaBackend_jar/SqlCulturaBackend.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
