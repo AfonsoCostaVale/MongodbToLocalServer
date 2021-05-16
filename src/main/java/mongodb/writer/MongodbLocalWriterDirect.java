@@ -38,12 +38,8 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
                     throwables.printStackTrace();
                 }
             }
-
-            try {
                 enterCheckMode();
-            } catch (MqttException e) {
-                e.printStackTrace();
-            }
+
 
         } catch (MongoInterruptedException e) {
             e.printStackTrace();
@@ -52,7 +48,7 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
         }
     }
 
-    protected void enterCheckMode() throws MqttException {
+    protected void enterCheckMode(){
 
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
         while (true) {
@@ -61,10 +57,6 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
                 write(documentToWrite);
                 // mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
                 System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
-            } catch (MongoWriteException e) {
-                if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                    System.out.println("Found Duplicate");
-                }
             } catch (IllegalArgumentException e) {
 
             }

@@ -38,12 +38,7 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
                 }
             }
             mqttWriter.disconnect();
-
-            try {
-                enterCheckMode();
-            } catch (MqttException e) {
-                e.printStackTrace();
-            }
+            enterCheckMode();
 
         } catch (MongoInterruptedException e) {
             e.printStackTrace();
@@ -56,7 +51,7 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
         }
     }
 
-    protected void enterCheckMode() throws MqttException {
+    protected void enterCheckMode(){
 
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
         while (true) {

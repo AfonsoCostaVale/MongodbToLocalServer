@@ -2,7 +2,9 @@ package main;
 
 import config.ConfigManager;
 import mongodb.collector.MongodbCloudCollector;
+import mongodb.collector.MongodbCloudCollectorDirect;
 import mongodb.collector.MongodbCloudCollectorData;
+import mongodb.collector.MongodbCloudCollectorMQTT;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -35,8 +37,32 @@ public class TerminalController{
     //public main.TerminalController(String filename,MongodbCloudCollector mongodbCloudCollector) throws FileNotFoundException {
     public TerminalController(String filename) throws FileNotFoundException {
         this.configManager = new ConfigManager(filename);
+        directOrMqtt();
+
+    }
+
+    private void directOrMqtt() throws FileNotFoundException {
         mongodbCloudCollectorData = configManager.readFromFile();
-        this.mongodbCloudCollector = new MongodbCloudCollector(mongodbCloudCollectorData);
+        String inputTerminal = "";
+        Boolean cycle = true;
+        do {
+            System.out.println("Deseja correr o programa em modo \"MQTT\" ou \"Direct\"?");
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+                inputTerminal = reader.readLine().trim();
+                System.out.println(inputTerminal);
+
+                if (inputTerminal.equals("mqtt")){
+                    this.mongodbCloudCollector = new MongodbCloudCollectorMQTT(mongodbCloudCollectorData);
+                    cycle=false;
+                }else if(inputTerminal.equals("direct")){
+                    this.mongodbCloudCollector = new MongodbCloudCollectorDirect(mongodbCloudCollectorData);
+                    cycle=false;
+                }
+            } catch (IOException e) {
+                System.out.println(ERRO_NO_INPUT_DA_INFORMACAO);
+            }
+        } while (cycle);
     }
 
     public void launch() throws InterruptedException {

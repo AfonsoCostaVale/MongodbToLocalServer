@@ -15,7 +15,7 @@ public abstract class MongodbLocalWriter extends Thread {
 
     public abstract void run();
 
-    protected abstract void enterCheckMode() throws MqttException;
+    protected abstract void enterCheckMode();
 
     public String getCollectionName() {
         return collectionName;
