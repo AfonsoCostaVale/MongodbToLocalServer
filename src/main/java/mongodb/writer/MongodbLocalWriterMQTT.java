@@ -32,9 +32,9 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
                     write(entry);
                     mqttWriter.sendMessage(entry.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
                 } catch (MongoWriteException e) {
-                    if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                        System.out.println("Found Duplicate");
-                    }
+                    //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+                    //    System.out.println("Found Duplicate");
+                    //}
                 }
             }
             mqttWriter.disconnect();
@@ -58,12 +58,12 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
             try {
                 Document documentToWrite = collectionToRead.find().skip((int) collectionToWrite.count()).first();
                 write(documentToWrite);
-               // mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
-                System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
+                //mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
+                //System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
             } catch (MongoWriteException e) {
-                if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                    System.out.println("Found Duplicate");
-                }
+                //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+                    //System.out.println("Found Duplicate");
+                //}
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
             }

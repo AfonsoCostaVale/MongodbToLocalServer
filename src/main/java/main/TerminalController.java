@@ -29,6 +29,9 @@ public class TerminalController{
     private static final String COPYRIGHT = "Programa feito no âmbito na disciplina de PSID pelo grupo 12.\n" +
             "Programa de terminal para gerir e sincronizar as importações do mongodb cloud para o local.\n" +
             "Escrever \"ajuda\" para ver os comandos disponiveis.";
+    public static final String DIRECT = "direct";
+    public static final String MQTT = "mqtt";
+    public static final String CURSOR = ">>> ";
 
     private MongodbCloudCollector mongodbCloudCollector;
     private MongodbCloudCollectorData mongodbCloudCollectorData;
@@ -37,12 +40,12 @@ public class TerminalController{
     //public main.TerminalController(String filename,MongodbCloudCollector mongodbCloudCollector) throws FileNotFoundException {
     public TerminalController(String filename) throws FileNotFoundException {
         this.configManager = new ConfigManager(filename);
-        directOrMqtt();
+        mongodbCloudCollectorData = configManager.readFromFile();
+        //directOrMqtt();
 
     }
 
     private void directOrMqtt() throws FileNotFoundException {
-        mongodbCloudCollectorData = configManager.readFromFile();
         String inputTerminal = "";
         Boolean cycle = true;
         do {
@@ -52,10 +55,10 @@ public class TerminalController{
                 inputTerminal = reader.readLine().trim();
                 System.out.println(inputTerminal);
 
-                if (inputTerminal.equals("mqtt")){
+                if (inputTerminal.equalsIgnoreCase("mqtt")){
                     this.mongodbCloudCollector = new MongodbCloudCollectorMQTT(mongodbCloudCollectorData);
                     cycle=false;
-                }else if(inputTerminal.equals("direct")){
+                }else if(inputTerminal.equalsIgnoreCase("direct")){
                     this.mongodbCloudCollector = new MongodbCloudCollectorDirect(mongodbCloudCollectorData);
                     cycle=false;
                 }
@@ -68,10 +71,15 @@ public class TerminalController{
     public void launch() throws InterruptedException {
         System.out.println(COPYRIGHT);
 
+        String autostart = mongodbCloudCollectorData.getAutostart();
+        if (autostart.equalsIgnoreCase("on")) {
+            dispatchedImport();
+        }
+
         String inputTerminal = "";
         while(!inputTerminal.equals(SAIR)){
             try {
-                System.out.print(">>> ");
+                System.out.print(CURSOR);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                 inputTerminal = reader.readLine().trim();
                 handleInputTerminal(inputTerminal);
@@ -160,6 +168,14 @@ public class TerminalController{
 
     private void dispatchedImport() {
         System.out.println("A inciar importação e sincronização.");
+        
+        String clone_mode = mongodbCloudCollectorData.getClone_mode();
+        
+        if(clone_mode.equalsIgnoreCase(MQTT)){
+            this.mongodbCloudCollector = new MongodbCloudCollectorMQTT(mongodbCloudCollectorData);
+        }else if(clone_mode.equalsIgnoreCase(DIRECT)){
+            this.mongodbCloudCollector = new MongodbCloudCollectorDirect(mongodbCloudCollectorData);
+        }
         mongodbCloudCollector.start();
     }
 
@@ -191,15 +207,16 @@ public class TerminalController{
 
 
     private void dispatchedAjuda(){
-        System.out.println("Lista de comandos:\n" +
-                "\""+IMPORTAR   +"\": Importar e sincronizar as mongodb locais com o cloud.\n"+
-                "\""+PARAR      +"\": Parar de clonar uma ou mais coleções. \"exemplo: parar -sensorh1 sensorh2\".\n"+
-                "\""+ALTERAR    +"\": Alterar parametros da configuração. exemplo: \"alterar -user manuel -password manuel2021\".\n"+
-                "\""+SHOWCONF   +"\": Mostrar configurações atuais.\n"+
-                "\""+SHOWDEFAULT+"\": Mostrar configurações default.\n"+
-                "\""+SAVE       +"\": Salvar as configurações atuais.\n"+
-                "\""+RESETCONF  +"\": Carregar as configurações default\n"+
-                "\""+SAIR       +"\": Sair do programa."
+        System.out.println("Lista de comandos:\n"                                                                                    +
+                "\""+IMPORTAR   +"\": Importar e sincronizar as mongodb locais com o cloud.\n"                                       +
+                "\""+PARAR      +"\": Parar de clonar uma ou mais coleções. \"exemplo: parar -sensorh1 sensorh2\".\n"                +
+                "\""+ALTERAR    +"\": Alterar parametros da configuração. exemplo: \"alterar -user manuel -password manuel2021\".\n" +
+                "\""+SHOWCONF   +"\": Mostrar configurações atuais.\n"                                                               +
+                "\""+SHOWDEFAULT+"\": Mostrar configurações default.\n"                                                              +
+                "\""+SAVE       +"\": Salvar as configurações atuais.\n"                                                             +
+                "\""+RESETCONF  +"\": Carregar as configurações default\n"                                                           +
+                "\""+SAIR       +"\": Sair do programa.\n"                                                                           +
+                "Para as novas configurações tomarem efeito sugerimos parar o programa e voltar a abrir"
         );
 
     }

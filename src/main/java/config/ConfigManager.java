@@ -12,7 +12,6 @@ import java.util.Scanner;
 public class ConfigManager {
     public static final String DEFAULTFILENAME = "conf.ini";
 
-
     private static final String[] COMMENT =
             {
                     "//Nome do utilizador da base de dados\n",
@@ -21,7 +20,9 @@ public class ConfigManager {
                     "//Ip a usar\n",
                     "//Porta a usar para efetuar a configuração\n",
                     "//Password a usar para entrar no mongodb\n",
-                    "//Nome das coleções a clonar, separadas por \";\"\n"
+                    "//Nome das coleções a clonar, separadas por \";\"\n",
+                    "//Modo de clonagem a usar, pode ser mqtt ou direct\n",
+                    "//AutoStart if you want the program to automatically start importing with the current configs, can be \"on\" or \"off\"\n",
             };
 
     public String getFilename() {
@@ -61,6 +62,10 @@ public class ConfigManager {
             }
             tempCollections = tempCollections.substring(0, tempCollections.length() - 1);
             myWriter.write(ConfigParams.COLLECTIONS + "=" + tempCollections + "\n");
+            myWriter.write(COMMENT[7]);
+            myWriter.write(ConfigParams.CLONEMODE + "=" + dataToWrite.getClone_mode() + "\n");
+            myWriter.write(COMMENT[8]);
+            myWriter.write(ConfigParams.AUTOSTART + "=" + dataToWrite.getAutostart() + "\n");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -118,6 +123,12 @@ public class ConfigManager {
                             break;
                         case COLLECTIONS:
                             data.setCollections(lineContent[1].split(";"));
+                            break;
+                        case CLONEMODE:
+                            data.setClone_mode(lineContent[1]);
+                            break;
+                        case AUTOSTART:
+                            data.setAutostart(lineContent[1]);
                             break;
                         default:
                             throw new IllegalArgumentException();

@@ -19,13 +19,13 @@ public class MQTTWriter {
     }
 
     public void connect() throws MqttException {
-        System.out.println("Connecting to broker: " + BROKER);
+        //System.out.println("Connecting to broker: " + BROKER);
         client.connect(connOpts);
-        System.out.println("Connected");
+        //System.out.println("Connected");
     }
 
     public void sendMessage(String content, int qos, String topic) throws MqttException, IOException {
-        System.out.println("Publishing message: " + content);
+        //System.out.println("Publishing message: " + content);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -37,12 +37,12 @@ public class MQTTWriter {
         message.setQos(qos);
         client.publish(topic, message);
 
-        System.out.println("Message published");
+        //System.out.println("Message published");
     }
 
     public void disconnect() throws MqttException {
         client.disconnect();
-        System.out.println("Disconnected");
+        //System.out.println("Disconnected");
 
     }
 }

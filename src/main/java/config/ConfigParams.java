@@ -8,7 +8,9 @@ public enum ConfigParams {
     IP("ip"),
     PORT("port"),
     PASSWORD("password"),
-    COLLECTIONS("collections");
+    COLLECTIONS("collections"),
+    CLONEMODE("clonemode"),
+    AUTOSTART("autostart");
 
     private final String label;
 
