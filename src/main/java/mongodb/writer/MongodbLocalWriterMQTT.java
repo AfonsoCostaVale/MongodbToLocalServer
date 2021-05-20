@@ -46,7 +46,7 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
                     break;
                 }
             }
-            mqttWriter.disconnect();
+            //mqttWriter.disconnect();
             enterCheckMode();
 
         } catch (MongoInterruptedException e) {
@@ -77,8 +77,9 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
             try {
                 Document documentToWrite = collectionToRead.find().skip((int) collectionToWrite.count()).first();
                 write(documentToWrite);
-                assert documentToWrite != null;
-                mqttWriter.sendMessage(documentToWrite.toString(), GeneralMqttVariables.TOPIC);
+                if (documentToWrite != null){
+                    mqttWriter.sendMessage(documentToWrite.toString(), GeneralMqttVariables.TOPIC);
+                }
                 //System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
             } catch (MongoWriteException e) {
                 //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
