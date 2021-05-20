@@ -1,10 +1,10 @@
 package mongodb.writer;
 
+import com.sun.media.jfxmediaimpl.MediaDisposer;
 import mqtt.GeneralMqttVariables;
 import mqtt.MQTTWriter;
 import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
@@ -14,6 +14,10 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
 
     private final MQTTWriter mqttWriter;
 
+    public void disconnect() throws MqttException {
+        mqttWriter.disconnect();
+    }
+
     public MongodbLocalWriterMQTT(String collection, MongoCollection<Document> collectionToRead, MQTTWriter mqttWriter) {
         localMongoClient = new MongoClient("localhost", 27017);
         localDB = localMongoClient.getDatabase("sid");
@@ -21,20 +25,25 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
         this.collectionToRead = collectionToRead;
         collectionName = collectionToRead.getNamespace().getFullName();
         this.mqttWriter = mqttWriter;
+        this.setName("Thread-"+collection);
     }
 
     public void run() {
         try {
-            System.out.println("Started writing in " + collectionToWrite.getNamespace().getFullName());
+            System.out.println(this.getName() + " Started writing in " + collectionToWrite.getNamespace().getFullName());
 
             for (Document entry : collectionToRead.find().skip((int) collectionToWrite.count())) {
-                try {
-                    write(entry);
-                    mqttWriter.sendMessage(entry.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
-                } catch (MongoWriteException e) {
-                    //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                    //    System.out.println("Found Duplicate");
-                    //}
+                if (!this.isInterrupted()) {
+                    try {
+                        write(entry);
+                        mqttWriter.sendMessage(entry.toString(), GeneralMqttVariables.TOPIC);
+                    } catch (MongoWriteException e) {
+                        //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+                        //    System.out.println("Found Duplicate");
+                        //}
+                    }
+                }else{
+                    break;
                 }
             }
             mqttWriter.disconnect();
@@ -48,17 +57,28 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            //e.printStackTrace();
+        } finally {
+            try {
+                mqttWriter.disconnect();
+            } catch (MqttException e) {
+                //e.printStackTrace();
+                System.out.println("Problemas a desconectar o mqttwritter!");
+            }
         }
+
     }
 
     protected void enterCheckMode(){
 
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 Document documentToWrite = collectionToRead.find().skip((int) collectionToWrite.count()).first();
                 write(documentToWrite);
-                //mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
+                assert documentToWrite != null;
+                mqttWriter.sendMessage(documentToWrite.toString(), GeneralMqttVariables.TOPIC);
                 //System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
             } catch (MongoWriteException e) {
                 //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
@@ -66,8 +86,16 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
                 //}
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
+            } catch (MqttException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException interruptedException) {
+                //interruptedException.printStackTrace();
+
             }
         }
+        System.out.println("Exiting checkMode");
 
     }
 

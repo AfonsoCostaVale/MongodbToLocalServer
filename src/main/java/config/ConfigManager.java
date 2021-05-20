@@ -23,6 +23,9 @@ public class ConfigManager {
                     "//Nome das coleções a clonar, separadas por \";\"\n",
                     "//Modo de clonagem a usar, pode ser mqtt ou direct\n",
                     "//AutoStart if you want the program to automatically start importing with the current configs, can be \"on\" or \"off\"\n",
+                    "//MQTTbroker is the ip of the mqttbroker that is going to be used to transfer data when mqtt option is enabled\n",
+                    "//MQTTQOS is the Quality of service used in the mqtt connection\n",
+                    "//MQTTTOPIC is the topic used in the mqtt connection\n",
             };
 
     public String getFilename() {
@@ -66,6 +69,12 @@ public class ConfigManager {
             myWriter.write(ConfigParams.CLONEMODE + "=" + dataToWrite.getClone_mode() + "\n");
             myWriter.write(COMMENT[8]);
             myWriter.write(ConfigParams.AUTOSTART + "=" + dataToWrite.getAutostart() + "\n");
+            myWriter.write(COMMENT[9]);
+            myWriter.write(ConfigParams.MQTTBROKER + "=" + dataToWrite.getMqttbroker() + "\n");
+            myWriter.write(COMMENT[10]);
+            myWriter.write(ConfigParams.MQTTQOS + "=" + dataToWrite.getMqttqos() + "\n");
+            myWriter.write(COMMENT[11]);
+            myWriter.write(ConfigParams.MQTTTOPIC + "=" + dataToWrite.getMqtttopic() + "\n");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -130,6 +139,16 @@ public class ConfigManager {
                         case AUTOSTART:
                             data.setAutostart(lineContent[1]);
                             break;
+                        case MQTTBROKER:
+                            data.setMqttbroker(lineContent[1]);
+                            break;
+                        case MQTTQOS:
+                            data.setMqttqos(Integer.parseInt(lineContent[1]));
+                            break;
+                        case MQTTTOPIC:
+                            data.setMqtttopic(lineContent[1]);
+                            break;
+
                         default:
                             throw new IllegalArgumentException();
                     }

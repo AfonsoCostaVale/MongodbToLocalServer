@@ -5,10 +5,15 @@ import java.io.FileNotFoundException;
 import static config.ConfigManager.DEFAULTFILENAME;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException, FileNotFoundException {
+    public static void main(String[] args) throws InterruptedException {
         //MongodbCloudCollector collector =new MongodbCloudCollector(DEFAULTCOLLECTORDATA);
-        TerminalController terminalController = new TerminalController(DEFAULTFILENAME);
-        terminalController.launch();
+        TerminalController terminalController = null;
+        try {
+            terminalController = new TerminalController(DEFAULTFILENAME);
+            terminalController.launch();
+        } catch (FileNotFoundException e) {
+            System.out.println("Could not find config File\nExiting");
+        }
     }
 
     /*TODO

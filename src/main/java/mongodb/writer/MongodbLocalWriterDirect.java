@@ -56,7 +56,7 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
                 Document documentToWrite = collectionToRead.find().skip((int) collectionToWrite.count()).first();
                 write(documentToWrite);
                 // mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
-                System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
+                //System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
             } catch (IllegalArgumentException e) {
 
             }

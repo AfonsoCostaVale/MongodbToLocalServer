@@ -10,10 +10,12 @@ public enum ConfigParams {
     PASSWORD("password"),
     COLLECTIONS("collections"),
     CLONEMODE("clonemode"),
-    AUTOSTART("autostart");
+    AUTOSTART("autostart"),
+    MQTTBROKER("mqttbroker"),
+    MQTTQOS("mqttqos"),
+    MQTTTOPIC("mqtttopic");
 
     private final String label;
-
 
     ConfigParams(String label) {
         this.label = label;

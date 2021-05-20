@@ -1,6 +1,7 @@
 package mongodb.collector;
 
 import config.ConfigParams;
+import mqtt.GeneralMqttVariables;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -18,6 +19,9 @@ public class MongodbCloudCollectorData implements Serializable {
     private String[] collections;
     private String clone_mode;
     private String autostart;
+    private String mqttbroker;
+    private int mqttqos;
+    private String mqtttopic;
 
     public MongodbCloudCollectorData(String user,
                                      String databaseUser,
@@ -27,7 +31,10 @@ public class MongodbCloudCollectorData implements Serializable {
                                      char[] password,
                                      String[] collections,
                                      String clone_mode,
-                                     String autostart
+                                     String autostart,
+                                     String mqttbroker,
+                                     int mqttQOS,
+                                     String mqtttopic
     ) {
         this.user = user;
         this.databaseUser = databaseUser;
@@ -38,8 +45,14 @@ public class MongodbCloudCollectorData implements Serializable {
         this.collections = collections;
         this.clone_mode = clone_mode;
         this.autostart = autostart;
+        this.mqttbroker = mqttbroker;
+        this.mqttqos = mqttQOS;
+        this.mqtttopic = mqtttopic;
     }
-
+/**
+ * Constructor with the default values for the config data
+ *
+ * */
     public MongodbCloudCollectorData() {
         this.user = "aluno";
         this.databaseUser = "admin";
@@ -49,27 +62,36 @@ public class MongodbCloudCollectorData implements Serializable {
         this.password = new char[]{'a', 'l', 'u', 'n', 'o'};
         this.collections = new String[]{"sensorh1", "sensorh2", "sensorl1", "sensorl2", "sensort1", "sensort2"};
         this.clone_mode = "mqtt";
-        this.autostart = "on";
+        this.autostart = "off";
+        this.mqttbroker = GeneralMqttVariables.BROKER;
+        this.mqttqos = GeneralMqttVariables.QOS;
+        this.mqtttopic = GeneralMqttVariables.TOPIC;
     }
 
-    public String getUser() {                           return user;                      }
-    public void setUser(String user) {                  this.user = user;                 }
-    public String getDatabaseUser() {                   return databaseUser;              }
-    public void setDatabaseUser(String databaseUser) {  this.databaseUser = databaseUser; }
-    public String getDatabase() {                       return database;                  }
-    public void setDatabase(String database) {          this.database = database;         }
-    public String getIp() {                             return ip;                        }
-    public void setIp(String ip) {                      this.ip = ip;                     }
-    public int getPort() {                              return port;                      }
-    public void setPort(int port) {                     this.port = port;                 }
-    public char[] getPassword() {                       return password;                  }
-    public void setPassword(char[] password) {          this.password = password;         }
-    public String[] getCollections() {                  return collections;               }
-    public void setCollections(String[] collections) {  this.collections = collections;   }
-    public String getClone_mode() {                     return clone_mode;                }
-    public void setClone_mode(String clone_mode) {      this.clone_mode = clone_mode;     }
-    public String getAutostart() {                      return autostart;                 }
-    public void setAutostart(String autostart) {        this.autostart = autostart;       }
+    public String       getUser() {                             return user;                      }
+    public void         setUser(String user) {                  this.user = user;                 }
+    public String       getDatabaseUser() {                     return databaseUser;              }
+    public void         setDatabaseUser(String databaseUser) {  this.databaseUser = databaseUser; }
+    public String       getDatabase() {                         return database;                  }
+    public void         setDatabase(String database) {          this.database = database;         }
+    public String       getIp() {                               return ip;                        }
+    public void         setIp(String ip) {                      this.ip = ip;                     }
+    public int          getPort() {                             return port;                      }
+    public void         setPort(int port) {                     this.port = port;                 }
+    public char[]       getPassword() {                         return password;                  }
+    public void         setPassword(char[] password) {          this.password = password;         }
+    public String[]     getCollections() {                      return collections;               }
+    public void         setCollections(String[] collections) {  this.collections = collections;   }
+    public String       getClone_mode() {                       return clone_mode;                }
+    public void         setClone_mode(String clone_mode) {      this.clone_mode = clone_mode;     }
+    public String       getAutostart() {                        return autostart;                 }
+    public void         setAutostart(String autostart) {        this.autostart = autostart;       }
+    public String       getMqttbroker() {                       return mqttbroker;                }
+    public void         setMqttbroker(String mqttbroker) {      this.mqttbroker = mqttbroker;     }
+    public int          getMqttqos() {                          return mqttqos;                   }
+    public void         setMqttqos(int mqttqos) {               this.mqttqos = mqttqos;           }
+    public String       getMqtttopic() {                        return mqtttopic;                 }
+    public void         setMqtttopic(String mqtttopic) {        this.mqtttopic = mqtttopic;       }
 
     /**
      * Method To change Config Settings
@@ -87,11 +109,15 @@ public class MongodbCloudCollectorData implements Serializable {
             //O switch case nao ta a igualar as strings, se em caso de houver uma resolução a isso trocar de volta para o switch case
 
             setting2Change = setting2Change.toLowerCase(Locale.ROOT);
-            if(setting2Change.equals(ConfigParams.USER.getLabel()))  setUser(newSingleValue);
-            else if(setting2Change.equals(ConfigParams.DATABASEUSERS.getLabel()))  setDatabaseUser(newSingleValue);
-            else if(setting2Change.equals(ConfigParams.DATABASE.getLabel()))  setDatabase(newSingleValue);
-            else if(setting2Change.equals(ConfigParams.IP.getLabel()))  setIp(newSingleValue);
-            else if(setting2Change.equals(ConfigParams.PORT.getLabel()))  {
+            if(setting2Change.equalsIgnoreCase(ConfigParams.USER.getLabel()))
+                setUser(newSingleValue);
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.DATABASEUSERS.getLabel()))
+                setDatabaseUser(newSingleValue);
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.DATABASE.getLabel()))
+                setDatabase(newSingleValue);
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.IP.getLabel()))
+                setIp(newSingleValue);
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.PORT.getLabel()))  {
                 try{
                     setPort(Integer.parseInt(newSingleValue));
                 } catch (NumberFormatException e) {
@@ -99,13 +125,27 @@ public class MongodbCloudCollectorData implements Serializable {
                     return false;
                 }
             }
-            else if(setting2Change.equals(ConfigParams.PASSWORD.getLabel())) {
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.PASSWORD.getLabel())) {
                 char[] passChar = newSingleValue.toCharArray();
                 setPassword(passChar);
             }
-            else if(setting2Change.equals(ConfigParams.COLLECTIONS.getLabel()))  setCollections(newArrayValue);
-            else if(setting2Change.equals(ConfigParams.CLONEMODE.getLabel()))  setClone_mode(newSingleValue);
-            else if(setting2Change.equals(ConfigParams.AUTOSTART.getLabel()))  setAutostart(newSingleValue);
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.COLLECTIONS.getLabel()))
+                setCollections(newArrayValue);
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.CLONEMODE.getLabel()))
+                setClone_mode(newSingleValue);
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.AUTOSTART.getLabel()))
+                setAutostart(newSingleValue);
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.MQTTBROKER.getLabel()))
+                setAutostart(newSingleValue);
+            else if(setting2Change.equalsIgnoreCase(ConfigParams.MQTTQOS.getLabel())) {
+                try{
+                    setMqttqos(Integer.parseInt(newSingleValue));
+                } catch (NumberFormatException e) {
+                    System.out.println("Não foi dado um número");
+                    return false;
+                }
+            } else if(setting2Change.equalsIgnoreCase(ConfigParams.MQTTTOPIC.getLabel()))
+                setMqtttopic(newSingleValue);
             else {
                 System.out.println("Parametro de configuração desconhecido");
                 return false;
@@ -129,6 +169,9 @@ public class MongodbCloudCollectorData implements Serializable {
                 "\n  " + spacer + ConfigParams.COLLECTIONS    +"='" + Arrays.toString(collections)  + '\'' +
                 "\n  " + spacer + ConfigParams.CLONEMODE      +"='" + clone_mode                    + '\'' +
                 "\n  " + spacer + ConfigParams.AUTOSTART      +"='" + autostart                     + '\'' +
+                "\n  " + spacer + ConfigParams.MQTTBROKER     +"='" + mqttbroker                    + '\'' +
+                "\n  " + spacer + ConfigParams.MQTTQOS        +"='" + mqttqos                       + '\'' +
+                "\n  " + spacer + ConfigParams.MQTTTOPIC      +"='" + mqtttopic                     + '\'' +
                 "\n}";
     }
 

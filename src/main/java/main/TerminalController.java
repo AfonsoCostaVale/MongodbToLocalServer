@@ -5,6 +5,7 @@ import mongodb.collector.MongodbCloudCollector;
 import mongodb.collector.MongodbCloudCollectorDirect;
 import mongodb.collector.MongodbCloudCollectorData;
 import mongodb.collector.MongodbCloudCollectorMQTT;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -14,29 +15,33 @@ import java.util.*;
 
 public class TerminalController{
 
+    private static final String IMPORTAR = "importar";
+    private static final String RESTARTCOLLETCTOR = "restartColletctor";
+    private static final String PARAR = "parar";
+    private static final String PARARTUDO = "parartudo";
+    private static final String ALTERAR = "alterar";
+    private static final String SHOWCONF = "mostrarconf";
+    private static final String SHOWDEFAULT = "showdefault";
+    private static final String RESETCONF = "reporconf";
+    private static final String SAVE = "salvar";
     private static final String SAIR = "sair";
     private static final String AJUDA = "ajuda";
-    private static final String IMPORTAR = "importar";
-    private static final String PARAR = "parar";
-    private static final String ALTERAR = "alterar";
-    private static final String SHOWCONF = "showconf";
-    private static final String SHOWDEFAULT = "showdefault";
-    private static final String SAVE = "save";
-    private static final String RESETCONF = "resetconf";
-    private static final String RESTARTCOLLETCTOR = "restartColletctor";
+
     private static final String COMANDONAORECONHECIDO = "é um comando não reconhecido, por favor digitar \"ajuda\" para saber a lista de comandos.";
     private static final String ERRO_NO_INPUT_DA_INFORMACAO = "Erro no input da informação.";
     private static final String COPYRIGHT = "Programa feito no âmbito na disciplina de PSID pelo grupo 12.\n" +
             "Programa de terminal para gerir e sincronizar as importações do mongodb cloud para o local.\n" +
             "Escrever \"ajuda\" para ver os comandos disponiveis.";
+
     public static final String DIRECT = "direct";
     public static final String MQTT = "mqtt";
+
     public static final String CURSOR = ">>> ";
 
     private MongodbCloudCollector mongodbCloudCollector;
     private MongodbCloudCollectorData mongodbCloudCollectorData;
     private ConfigManager configManager;
-
+    private boolean isImport=false;
     //public main.TerminalController(String filename,MongodbCloudCollector mongodbCloudCollector) throws FileNotFoundException {
     public TerminalController(String filename) throws FileNotFoundException {
         this.configManager = new ConfigManager(filename);
@@ -121,6 +126,9 @@ public class TerminalController{
             } case PARAR: {
                 dispatchedParar(commandArgs);
                 break;
+            }case PARARTUDO: {
+                dispatchedPararALL();
+                break;
             } case ALTERAR: {
                 dispatchedAlterar(commandArgs);
                 break;
@@ -143,9 +151,8 @@ public class TerminalController{
     }
 
     private void dispatchedRestart() {
-        mongodbCloudCollector.killWriters();
-        mongodbCloudCollector.interrupt();
-        mongodbCloudCollector.start();
+        dispatchedPararALL();
+        dispatchedImport();
     }
 
     private void dispatchedReset() {
@@ -167,16 +174,20 @@ public class TerminalController{
     }
 
     private void dispatchedImport() {
-        System.out.println("A inciar importação e sincronização.");
-        
-        String clone_mode = mongodbCloudCollectorData.getClone_mode();
-        
-        if(clone_mode.equalsIgnoreCase(MQTT)){
-            this.mongodbCloudCollector = new MongodbCloudCollectorMQTT(mongodbCloudCollectorData);
-        }else if(clone_mode.equalsIgnoreCase(DIRECT)){
-            this.mongodbCloudCollector = new MongodbCloudCollectorDirect(mongodbCloudCollectorData);
+        if (!isImport) {
+            System.out.println("A inciar importação e sincronização.");
+            isImport = true;
+            String clone_mode = mongodbCloudCollectorData.getClone_mode();
+
+            if(clone_mode.equalsIgnoreCase(MQTT)){
+                this.mongodbCloudCollector = new MongodbCloudCollectorMQTT(mongodbCloudCollectorData);
+            }else if(clone_mode.equalsIgnoreCase(DIRECT)){
+                this.mongodbCloudCollector = new MongodbCloudCollectorDirect(mongodbCloudCollectorData);
+            }
+            mongodbCloudCollector.start();
+        } else {
+            System.out.println("A importação já está a ser executada, por favor pare tudo para voltar a iniciar a importação.");
         }
-        mongodbCloudCollector.start();
     }
 
     private void dispatchedParar(List<String> commandArgs) {
@@ -184,14 +195,19 @@ public class TerminalController{
             for (String collection : commandArgs) {
                 collection = collection.trim();
                 if (mongodbCloudCollector.removeWriter(collection)) {
-                    System.out.println("Parado com sucessos" + collection + " foi parada ");
+                    System.out.println("Parado com sucesso" + collection + " foi parada.");
                 } else {
-                    System.out.println(collection + " não foi encontrado e não pode ser removido");
+                    System.out.println(collection + " não foi encontrado e não pode ser removido.");
                 }
             }
         } else {
             System.out.println("Não inseriu nenhuma coleção para parar!");
         }
+    }
+    private void dispatchedPararALL() {
+        mongodbCloudCollector.killWriters();
+        isImport = false;
+        System.out.println("Todos os cloners foram parados com sucesso.");
     }
 
     private void dispatchedAlterar(List<String> alterarNewValue) {
@@ -205,17 +221,19 @@ public class TerminalController{
         }
     }
 
-
     private void dispatchedAjuda(){
-        System.out.println("Lista de comandos:\n"                                                                                    +
-                "\""+IMPORTAR   +"\": Importar e sincronizar as mongodb locais com o cloud.\n"                                       +
-                "\""+PARAR      +"\": Parar de clonar uma ou mais coleções. \"exemplo: parar -sensorh1 sensorh2\".\n"                +
-                "\""+ALTERAR    +"\": Alterar parametros da configuração. exemplo: \"alterar -user manuel -password manuel2021\".\n" +
-                "\""+SHOWCONF   +"\": Mostrar configurações atuais.\n"                                                               +
-                "\""+SHOWDEFAULT+"\": Mostrar configurações default.\n"                                                              +
-                "\""+SAVE       +"\": Salvar as configurações atuais.\n"                                                             +
-                "\""+RESETCONF  +"\": Carregar as configurações default\n"                                                           +
-                "\""+SAIR       +"\": Sair do programa.\n"                                                                           +
+        System.out.println("Lista de comandos:\n"+
+                "\""+IMPORTAR           +"\": Importar as mongodb locais com o cloud.\n"                                                     +
+                "\""+RESTARTCOLLETCTOR  +"\": Efetua o restart das improtações(fecha e volta a abrir com as novas configurações).\n"         +
+                "\""+PARAR              +"\": Parar de clonar uma ou mais coleções. exemplo:\" parar -sensorh1 sensorh2\".\n"                +
+                "\""+PARARTUDO          +"\": Parar de clonar TODAS as coleções. exemplo:\" parartudo\".\n"                                  +
+                "\""+ALTERAR            +"\": Alterar parametros da configuração. exemplo: \"alterar -user manuel -password manuel2021\".\n" +
+                "\""+SHOWCONF           +"\": Mostrar configurações atuais.\n"                                                               +
+                "\""+SHOWDEFAULT        +"\": Mostrar configurações default.\n"                                                              +
+                "\""+RESETCONF          +"\": Carregar as configurações default\n"                                                           +
+                "\""+SAVE               +"\": Salvar as configurações atuais.\n"                                                             +
+                "\""+SAIR               +"\": Sair do programa.\n"                                                                           +
+                "\""+AJUDA              +"\": Mostrar os comandos do programa.\n"                                                                           +
                 "Para as novas configurações tomarem efeito sugerimos parar o programa e voltar a abrir"
         );
 
