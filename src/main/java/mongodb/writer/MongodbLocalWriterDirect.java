@@ -11,7 +11,6 @@ import util.Pair;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class MongodbLocalWriterDirect extends MongodbLocalWriter {
@@ -39,42 +38,69 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
     public void run() {
         try {
             //System.out.println("Started writing in " + collectionToWrite.getNamespace().getFullName());
-            int problems =0;
-            boolean first=true;
-            BasicDBObject dbQuerry= new BasicDBObject();
-            dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
-            FindIterable<Document> documents = collectionToRead.find(dbQuerry);
-            for (Document entry : documents) {
-                try {
-                    if(first){
-                        sensorID = CulturaDB.getSensorId(this.connection,entry.toString());
-                        first = false;
-                    }
-                    write(entry);
-                    lastMedicao = CulturaDB.insertMedicao(entry.toString(), this.connection);
-                    handlePredictedValue();
-                } catch (MongoWriteException e) {
-                    //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                        //System.out.println("Found Duplicate");
-                    //}
-                } catch (SQLException throwables) {
-                    System.out.println(this.getName()+"-Problemas com a ligação SQL");
-                    problems++;
-                    if(problems ==10){
-                        System.out.println(this.getName()+"-Quit");
-                        break;
-                    }
-                    //throwables.printStackTrace();
+            boolean first = true;
+
+             while (!Thread.currentThread().isInterrupted()){
+
+
+                BasicDBObject dbQuerry= new BasicDBObject();
+                dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
+                FindIterable<Document> documents;
+
+                BasicDBObject currentdbQuerry= MongodbCloudCollectorData.getLastMinuteDBQuery();
+
+                if (first) {
+                    documents = collectionToRead.find(dbQuerry).sort(new BasicDBObject("Date",1));
+                    first = false;
+                } else {
+                    documents = collectionToRead.find(currentdbQuerry).sort(new BasicDBObject("Date",1));
                 }
-            }
-            enterCheckMode();
-        } catch (MongoInterruptedException e) {
-            e.printStackTrace();
-        } catch (MongoTimeoutException e) {
-            e.printStackTrace();
+                if (!cloneDocuments( documents,this.connection)) {
+                    break;
+                }
+             }
+
+
+            //enterCheckMode();
+        }catch (Exception e){
+            System.out.println(this.getName()+ ERRO_GERAL_CONTACTE_O_SUPORTE);
         }
     }
 
+    private boolean cloneDocuments(FindIterable<Document> documents, Connection connection) {
+        boolean first=true;
+        int problems =0;
+        for (Document entry : documents) {
+            try {
+                if(first){
+                    sensorID = CulturaDB.getSensorId(connection,entry.toString());
+                    first = false;
+                }
+                write(entry);
+                lastMedicao = CulturaDB.insertMedicao(entry.toString(), connection);
+                handlePredictedValue();
+
+            } catch (MongoWriteException e) {
+                //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+                    //System.out.println("Found Duplicate");
+                //}
+            } catch (SQLException throwables) {
+                System.out.println(this.getName()+"-"+problems+"ºProblemas com a connecção SQL");
+                //throwables.printStackTrace();
+                problems++;
+                if(problems ==10){
+                    System.out.println(this.getName()+" Obteve 10 erros- Quitting");
+                    return false;
+                }
+                //throwables.printStackTrace();
+            }catch(Exception e){
+                System.out.println(this.getName()+ ERRO_GERAL_CONTACTE_O_SUPORTE);
+                return false;
+            }
+        }
+        return true;
+    }
+/*
     protected void enterCheckMode(){
 
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
@@ -83,7 +109,14 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
                 FindIterable<Document> documentsToWrite = collectionToRead.find(MongodbCloudCollectorData.getLastMinuteDBQuery());
                 for (Document doc:documentsToWrite) {
                     if (doc != null){
-                        write(doc);
+                        try {
+                            write(doc);
+                        } catch (MongoWriteException e) {
+                            //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+                                //System.out.println("Found Duplicate");
+                            //}
+                        }
+
                         // mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
                         //System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
                     }
@@ -94,7 +127,7 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
         }
 
     }
-
+*/
     private void handlePredictedValue() throws SQLException {
         ArrayList<String> lastMedicaoWithId = getLastMedicaoWithId(this.connection, sensorID);
         if(lastMedicaoWithId.isEmpty()) { return;}
@@ -113,7 +146,7 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
                 //Predicted Value is sent back to backend to be decided if an alerta is sent or not
                 lastMedicaoWithId.add(String.valueOf(predictedValue));
                 CulturaDB.checkForAlerta(this.connection, lastMedicaoWithId,true);
-                System.out.println("Added Predicted: " + predictedValue);
+                //System.out.println("Added Predicted: " + predictedValue);
             }
         } else if(lastMedicoes.getA() != null ){
             lastMedicoes.getB().putValue((lastMedicoes.getA()-newLeitura) * 100 / newLeitura);

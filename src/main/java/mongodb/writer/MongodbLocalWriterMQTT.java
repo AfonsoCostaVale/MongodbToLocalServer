@@ -32,50 +32,70 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
 
     public void run() {
         try {
-            System.out.println(this.getName() + " Started writing in " + collectionToWrite.getNamespace().getFullName());
+            boolean first = true;
+            while (!Thread.currentThread().isInterrupted()) {
+                //System.out.println(this.getName() + " Started writing in " + collectionToWrite.getNamespace().getFullName());
 
-            BasicDBObject dbQuerry= new BasicDBObject();
-            dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
-            FindIterable<Document> documents = collectionToRead.find(dbQuerry);
+                BasicDBObject dbQuerry= new BasicDBObject();
+                dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
+                FindIterable<Document> documents;
 
-            for (Document entry : documents) {
-                if (!this.isInterrupted()) {
-                    try {
-                        write(entry);
-                        mqttWriter.sendMessage(entry.toString(), GeneralMqttVariables.TOPIC);
-                    } catch (MongoWriteException e) {
-                        //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                        //    System.out.println("Found Duplicate");
-                        //}
-                    }
-                }else{
+                BasicDBObject currentdbQuerry= MongodbCloudCollectorData.getLastMinuteDBQuery();
+
+                if (first) {
+                    documents = collectionToRead.find(dbQuerry).sort(new BasicDBObject("Date",1));
+                    first = false;
+                } else {
+                    documents = collectionToRead.find(currentdbQuerry).sort(new BasicDBObject("Date",1));
+                }
+                if (!cloneDocuments(documents)) {
                     break;
                 }
+                //mqttWriter.disconnect();
+                //enterCheckMode();
             }
-            //mqttWriter.disconnect();
-            enterCheckMode();
 
-        } catch (MongoInterruptedException e) {
-            e.printStackTrace();
-        } catch (MongoTimeoutException e) {
-            e.printStackTrace();
-        } catch (MqttException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            //e.printStackTrace();
+        }catch (Exception e){
+            System.out.println(this.getName()+ ERRO_GERAL_CONTACTE_O_SUPORTE);
         } finally {
             try {
                 mqttWriter.disconnect();
             } catch (MqttException e) {
                 //e.printStackTrace();
-                System.out.println("Problemas a desconectar o mqttwritter!");
+                System.out.println(this.getName()+" Problemas a desconectar o mqttwritter!");
             }
         }
 
     }
+    private boolean cloneDocuments(FindIterable<Document> documents) {
+        boolean first=true;
+        int problems =0;
+        for (Document entry : documents) {
+            try {
+                write(entry);
+                mqttWriter.sendMessage(entry.toString(), GeneralMqttVariables.TOPIC);
 
+            } catch (MongoWriteException e) {
+                //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+                //System.out.println("Found Duplicate");
+                //}
+            } catch ( MqttException throwables) {
+                System.out.println(this.getName()+"-"+problems+"ºProblemas with MQTT Connection");
+                //throwables.printStackTrace();
+                problems++;
+                if(problems ==10){
+                    System.out.println(this.getName()+ OBTEVE_10_ERRORS_QUITTING);
+                    return false;
+                }
+                //throwables.printStackTrace();
+            }catch(Exception e){
+                System.out.println(this.getName()+"General Error- Quitting");
+                return false;
+            }
+        }
+        return true;
+    }
+    /*
     protected void enterCheckMode(){
 
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
@@ -93,19 +113,12 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
                 //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
                     //System.out.println("Found Duplicate");
                 //}
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            } catch (MqttException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException interruptedException) {
-                //interruptedException.printStackTrace();
-
+            }catch (Exception e){
+                System.out.println(this.getName()+ ERRO_GERAL_CONTACTE_O_SUPORTE);
             }
         }
         System.out.println("Exiting checkMode");
 
     }
-
+*/
 }

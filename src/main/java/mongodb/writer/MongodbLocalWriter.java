@@ -8,6 +8,9 @@ import mongodb.collector.MongodbCloudCollectorData;
 import org.bson.Document;
 
 public abstract class MongodbLocalWriter extends Thread {
+    public static final String ERRO_GERAL_CONTACTE_O_SUPORTE = "Erro geral! Contacte o suporte";
+    public static final String OBTEVE_10_ERRORS_QUITTING = " Obteve 10 errors- Quitting";
+
     protected MongoClient localMongoClient;
     protected MongoDatabase localDB;
     protected MongoCollection<Document> collectionToWrite;
@@ -17,7 +20,7 @@ public abstract class MongodbLocalWriter extends Thread {
 
     public abstract void run();
 
-    protected abstract void enterCheckMode();
+    //protected abstract void enterCheckMode();
 
     public String getCollectionName() {
         return collectionName;

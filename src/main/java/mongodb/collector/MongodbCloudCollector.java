@@ -28,6 +28,14 @@ public abstract class MongodbCloudCollector extends Thread{
         return false;
     }
 
+    public boolean aliveWriter(){
+        boolean alives= true;
+        for (MongodbLocalWriter writer : writers) {
+            alives = alives && writer.isAlive();
+        }
+        return alives;
+    }
+
     public void run() {
         collect();
     }
@@ -35,9 +43,12 @@ public abstract class MongodbCloudCollector extends Thread{
     protected void collect() {
         try {
             writeInfo(createClient().getDatabase(getData().getDatabase()));
+            for (MongodbLocalWriter writer : writers) {
+                writer.join();
+            }
         } catch (InterruptedException e) {
             //e.printStackTrace();
-            System.out.println("Could not write collections to local server");
+            System.out.println("Nao foi possivel escrever as colecoes no servidor Local MongoDB!");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

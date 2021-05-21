@@ -91,6 +91,7 @@ public class TerminalController{
             } catch (IOException ioException) {
                 System.out.println(ERRO_NO_INPUT_DA_INFORMACAO);
             }catch(Exception exception){
+                exception.printStackTrace();
                 System.out.println("Erro inesperado");
             }
         }
@@ -176,20 +177,31 @@ public class TerminalController{
     }
 
     private void dispatchedImport() {
-        if (!isImport) {
-            System.out.println("A inciar importação e sincronização.");
-            isImport = true;
-            String clone_mode = mongodbCloudCollectorData.getClone_mode();
 
-            if(clone_mode.equalsIgnoreCase(MQTT)){
-                this.mongodbCloudCollector = new MongodbCloudCollectorMQTT(mongodbCloudCollectorData);
-            }else if(clone_mode.equalsIgnoreCase(DIRECT)){
-                this.mongodbCloudCollector = new MongodbCloudCollectorDirect(mongodbCloudCollectorData);
+        try {
+            if (!mongodbCloudCollector.aliveWriter()) {
+                dispatchedImportAUX();
+            } else {
+                System.out.println("A importação já está a ser executada, por favor pare tudo para voltar a iniciar a importação.");
             }
-            mongodbCloudCollector.start();
-        } else {
-            System.out.println("A importação já está a ser executada, por favor pare tudo para voltar a iniciar a importação.");
+        } catch (NullPointerException nullPointerException) {
+            //nullPointerException.printStackTrace();
+            dispatchedImportAUX();
         }
+
+    }
+
+    private void dispatchedImportAUX() {
+        System.out.println("A importar.");
+        isImport = true;
+        String clone_mode = mongodbCloudCollectorData.getClone_mode();
+
+        if(clone_mode.equalsIgnoreCase(MQTT)){
+            this.mongodbCloudCollector = new MongodbCloudCollectorMQTT(mongodbCloudCollectorData);
+        }else if(clone_mode.equalsIgnoreCase(DIRECT)){
+            this.mongodbCloudCollector = new MongodbCloudCollectorDirect(mongodbCloudCollectorData);
+        }
+        mongodbCloudCollector.start();
     }
 
     private void dispatchedParar(List<String> commandArgs) {
