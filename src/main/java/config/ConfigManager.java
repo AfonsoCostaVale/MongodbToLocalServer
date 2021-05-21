@@ -26,6 +26,10 @@ public class ConfigManager {
                     "//MQTTbroker is the ip of the mqttbroker that is going to be used to transfer data when mqtt option is enabled\n",
                     "//MQTTQOS is the Quality of service used in the mqtt connection\n",
                     "//MQTTTOPIC is the topic used in the mqtt connection\n",
+                    "//LOCALMONGODBNAME is the name used for the local mongoDatabase\n",
+                    "//YEARDATEFORMONGOCLONE is the year at which documents start getting cloned from the cloud \n",
+                    "//MONTHDATEFORMONGOCLONE is the month at which documents start getting cloned from the cloud \n",
+                    "//DAYDATEFORMONGOCLONE is the day at which documents start getting cloned from the cloud \n",
             };
 
     public String getFilename() {
@@ -75,6 +79,14 @@ public class ConfigManager {
             myWriter.write(ConfigParams.MQTTQOS + "=" + dataToWrite.getMqttqos() + "\n");
             myWriter.write(COMMENT[11]);
             myWriter.write(ConfigParams.MQTTTOPIC + "=" + dataToWrite.getMqtttopic() + "\n");
+            myWriter.write(COMMENT[12]);
+            myWriter.write(ConfigParams.LOCALMONGODBNAME + "=" + dataToWrite.getLocalmongodbname() + "\n");
+            myWriter.write(COMMENT[13]);
+            myWriter.write(ConfigParams.YEARDATEFORMONGOCLONE + "=" + dataToWrite.getYeardateformongoclone() + "\n");
+            myWriter.write(COMMENT[14]);
+            myWriter.write(ConfigParams.MONTHDATEFORMONGOCLONE + "=" + dataToWrite.getMonthdateformongoclone() + "\n");
+            myWriter.write(COMMENT[15]);
+            myWriter.write(ConfigParams.DAYDATEFORMONGOCLONE + "=" + dataToWrite.getDaydateformongoclone() + "\n");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -147,6 +159,18 @@ public class ConfigManager {
                             break;
                         case MQTTTOPIC:
                             data.setMqtttopic(lineContent[1]);
+                            break;
+                        case LOCALMONGODBNAME:
+                            data.setLocalmongodbname(lineContent[1]);
+                            break;
+                        case YEARDATEFORMONGOCLONE:
+                            data.setYeardateformongoclone(Integer.parseInt(lineContent[1]));
+                            break;
+                        case MONTHDATEFORMONGOCLONE:
+                            data.setMonthdateformongoclone(Integer.parseInt(lineContent[1]));
+                            break;
+                        case DAYDATEFORMONGOCLONE:
+                            data.setDaydateformongoclone(Integer.parseInt(lineContent[1]));
                             break;
 
                         default:

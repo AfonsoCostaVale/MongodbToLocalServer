@@ -1,10 +1,11 @@
 package mongodb.writer;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import mongodb.collector.MongodbCloudCollectorData;
 import org.bson.Document;
-import org.eclipse.paho.client.mqttv3.MqttException;
 
 public abstract class MongodbLocalWriter extends Thread {
     protected MongoClient localMongoClient;
@@ -12,6 +13,7 @@ public abstract class MongodbLocalWriter extends Thread {
     protected MongoCollection<Document> collectionToWrite;
     protected MongoCollection<Document> collectionToRead;
     protected String collectionName;
+    protected MongodbCloudCollectorData data;
 
     public abstract void run();
 

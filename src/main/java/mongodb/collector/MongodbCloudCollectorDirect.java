@@ -35,7 +35,7 @@ public class MongodbCloudCollectorDirect extends MongodbCloudCollector {
             MongoCollection<Document> table = db.getCollection(collection);
 
 //          MongodbLocalWriter mongodbLocalWriter = new MongodbLocalWriterMQTT(collection, table,mqttWriter);
-            MongodbLocalWriter mongodbLocalWriter = new MongodbLocalWriterDirect(collection, table, connection);
+            MongodbLocalWriter mongodbLocalWriter = new MongodbLocalWriterDirect(collection, table, connection,data);
             writers.add(mongodbLocalWriter);
             mongodbLocalWriter.start();
         }

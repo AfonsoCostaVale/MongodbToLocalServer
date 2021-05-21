@@ -1,15 +1,17 @@
 package mongodb.writer;
 
 import com.mongodb.*;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import mongodb.collector.MongodbCloudCollectorData;
 import org.bson.Document;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import sql.CulturaDB;
 import util.Average;
 import util.Pair;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class MongodbLocalWriterDirect extends MongodbLocalWriter {
@@ -17,26 +19,32 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
     private final Connection connection;
 
     private int sensorID = 0;
-    private Pair<Double,Average> lastMedicoes;
+    private final Pair<Double,Average> lastMedicoes;
     private ArrayList<String> lastMedicao;
 
 
-    public MongodbLocalWriterDirect(String collection, MongoCollection<Document> collectionToRead, Connection connection) {
+    public MongodbLocalWriterDirect(String collection, MongoCollection<Document> collectionToRead, Connection connection, MongodbCloudCollectorData data) {
         localMongoClient = new MongoClient("localhost", 27017);
-        localDB = localMongoClient.getDatabase("sid");
+        localDB = localMongoClient.getDatabase(data.getLocalmongodbname());
         this.collectionToWrite = localDB.getCollection(collection);
         this.collectionToRead = collectionToRead;
         collectionName = collectionToRead.getNamespace().getFullName();
         this.connection = connection;
+        this.setName("Thread DIRECT-"+collection);
         lastMedicoes = new Pair<>(null,new Average(sensorID));
         lastMedicao = new ArrayList<>();
+        this.data = data;
     }
 
     public void run() {
         try {
-            System.out.println("Started writing in " + collectionToWrite.getNamespace().getFullName());
+            //System.out.println("Started writing in " + collectionToWrite.getNamespace().getFullName());
+            int problems =0;
             boolean first=true;
-            for (Document entry : collectionToRead.find().skip((int) collectionToWrite.count())) {
+            BasicDBObject dbQuerry= new BasicDBObject();
+            dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
+            FindIterable<Document> documents = collectionToRead.find(dbQuerry);
+            for (Document entry : documents) {
                 try {
                     if(first){
                         sensorID = CulturaDB.getSensorId(this.connection,entry.toString());
@@ -46,11 +54,17 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
                     lastMedicao = CulturaDB.insertMedicao(entry.toString(), this.connection);
                     handlePredictedValue();
                 } catch (MongoWriteException e) {
-                    if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                        System.out.println("Found Duplicate");
-                    }
+                    //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+                        //System.out.println("Found Duplicate");
+                    //}
                 } catch (SQLException throwables) {
-                    throwables.printStackTrace();
+                    System.out.println(this.getName()+"-Problemas com a ligação SQL");
+                    problems++;
+                    if(problems ==10){
+                        System.out.println(this.getName()+"-Quit");
+                        break;
+                    }
+                    //throwables.printStackTrace();
                 }
             }
             enterCheckMode();
@@ -64,12 +78,16 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
     protected void enterCheckMode(){
 
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
-                Document documentToWrite = collectionToRead.find().skip((int) collectionToWrite.count()).first();
-                write(documentToWrite);
-                // mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
-                //System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
+                FindIterable<Document> documentsToWrite = collectionToRead.find(MongodbCloudCollectorData.getLastMinuteDBQuery());
+                for (Document doc:documentsToWrite) {
+                    if (doc != null){
+                        write(doc);
+                        // mqttWriter.sendMessage(documentToWrite.toString(),GeneralMqttVariables.QOS,GeneralMqttVariables.TOPIC);
+                        //System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
+                    }
+                }
             } catch (IllegalArgumentException e) {
 
             }

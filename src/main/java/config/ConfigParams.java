@@ -13,7 +13,11 @@ public enum ConfigParams {
     AUTOSTART("autostart"),
     MQTTBROKER("mqttbroker"),
     MQTTQOS("mqttqos"),
-    MQTTTOPIC("mqtttopic");
+    MQTTTOPIC("mqtttopic"),
+    LOCALMONGODBNAME("localmongodbname"),
+    YEARDATEFORMONGOCLONE("yeardateformongoclone"),
+    MONTHDATEFORMONGOCLONE("monthdateformongoclone"),
+    DAYDATEFORMONGOCLONE("daydateformongoclone");
 
     private final String label;
 

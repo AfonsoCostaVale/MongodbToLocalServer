@@ -1,6 +1,7 @@
 package mongodb.writer;
 
-import com.sun.media.jfxmediaimpl.MediaDisposer;
+import com.mongodb.client.FindIterable;
+import mongodb.collector.MongodbCloudCollectorData;
 import mqtt.GeneralMqttVariables;
 import mqtt.MQTTWriter;
 import com.mongodb.*;
@@ -18,21 +19,26 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
         mqttWriter.disconnect();
     }
 
-    public MongodbLocalWriterMQTT(String collection, MongoCollection<Document> collectionToRead, MQTTWriter mqttWriter) {
+    public MongodbLocalWriterMQTT(String collection, MongoCollection<Document> collectionToRead, MQTTWriter mqttWriter, MongodbCloudCollectorData data) {
         localMongoClient = new MongoClient("localhost", 27017);
-        localDB = localMongoClient.getDatabase("sid");
+        localDB = localMongoClient.getDatabase(data.getLocalmongodbname());
         this.collectionToWrite = localDB.getCollection(collection);
         this.collectionToRead = collectionToRead;
         collectionName = collectionToRead.getNamespace().getFullName();
         this.mqttWriter = mqttWriter;
-        this.setName("Thread-"+collection);
+        this.data = data;
+        this.setName("Thread MQTT-"+collection);
     }
 
     public void run() {
         try {
             System.out.println(this.getName() + " Started writing in " + collectionToWrite.getNamespace().getFullName());
 
-            for (Document entry : collectionToRead.find().skip((int) collectionToWrite.count())) {
+            BasicDBObject dbQuerry= new BasicDBObject();
+            dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
+            FindIterable<Document> documents = collectionToRead.find(dbQuerry);
+
+            for (Document entry : documents) {
                 if (!this.isInterrupted()) {
                     try {
                         write(entry);
@@ -75,12 +81,14 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
         System.out.println("Entered check mode " + collectionToWrite.getNamespace().getFullName());
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Document documentToWrite = collectionToRead.find().skip((int) collectionToWrite.count()).first();
-                write(documentToWrite);
-                if (documentToWrite != null){
-                    mqttWriter.sendMessage(documentToWrite.toString(), GeneralMqttVariables.TOPIC);
+                FindIterable<Document> documentsToWrite = collectionToRead.find(MongodbCloudCollectorData.getLastMinuteDBQuery());
+                for (Document doc:documentsToWrite) {
+                    if (doc != null){
+                        write(doc);
+                        mqttWriter.sendMessage(doc.toString(), GeneralMqttVariables.TOPIC);
+                        //System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
+                    }
                 }
-                //System.out.println("Added " + collectionToWrite.getNamespace().getFullName());
             } catch (MongoWriteException e) {
                 //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
                     //System.out.println("Found Duplicate");
