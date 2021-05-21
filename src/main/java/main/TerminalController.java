@@ -112,6 +112,8 @@ public class TerminalController{
     private void dispatcher(String command, LinkedList<String> commandArgs) {
         switch (command){
             case SAIR:
+                dispatchedPararALL();
+                break;
             case "": {
                 break;
             }case AJUDA:{
