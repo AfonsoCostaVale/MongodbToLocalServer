@@ -33,20 +33,20 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
     public void run() {
         try {
             boolean first = true;
+                BasicDBObject currentdbQuerry= MongodbCloudCollectorData.getLastMinuteDBQuery();
             while (!Thread.currentThread().isInterrupted()) {
                 //System.out.println(this.getName() + " Started writing in " + collectionToWrite.getNamespace().getFullName());
 
-                BasicDBObject dbQuerry= new BasicDBObject();
-                dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
                 FindIterable<Document> documents;
 
-                BasicDBObject currentdbQuerry= MongodbCloudCollectorData.getLastMinuteDBQuery();
-
                 if (first) {
+                    BasicDBObject dbQuerry= new BasicDBObject();
+                    dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
                     documents = collectionToRead.find(dbQuerry).sort(new BasicDBObject("Date",1));
                     first = false;
                 } else {
                     documents = collectionToRead.find(currentdbQuerry).sort(new BasicDBObject("Date",1));
+                    currentdbQuerry= MongodbCloudCollectorData.getLastMinuteDBQuery();
                 }
                 if (!cloneDocuments(documents)) {
                     break;
@@ -75,13 +75,9 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
                 write(entry);
                 mqttWriter.sendMessage(entry.toString(), GeneralMqttVariables.TOPIC);
 
-            } catch (MongoWriteException e) {
-                //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                //System.out.println("Found Duplicate");
-                //}
+            } catch (MongoWriteException ignored) {
             } catch ( MqttException throwables) {
                 System.out.println(this.getName()+"-"+problems+"ºProblemas with MQTT Connection");
-                //throwables.printStackTrace();
                 problems++;
                 if(problems ==10){
                     System.out.println(this.getName()+ OBTEVE_10_ERRORS_QUITTING);

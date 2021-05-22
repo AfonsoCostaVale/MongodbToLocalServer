@@ -39,22 +39,25 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
         try {
             //System.out.println("Started writing in " + collectionToWrite.getNamespace().getFullName());
             boolean first = true;
+            BasicDBObject currentdbQuerry=MongodbCloudCollectorData.getLastMinuteDBQuery();
 
              while (!Thread.currentThread().isInterrupted()){
 
-
-                BasicDBObject dbQuerry= new BasicDBObject();
-                dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
                 FindIterable<Document> documents;
 
-                BasicDBObject currentdbQuerry= MongodbCloudCollectorData.getLastMinuteDBQuery();
+
 
                 if (first) {
+                    BasicDBObject dbQuerry= new BasicDBObject();
+                    dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
                     documents = collectionToRead.find(dbQuerry).sort(new BasicDBObject("Date",1));
                     first = false;
                 } else {
                     documents = collectionToRead.find(currentdbQuerry).sort(new BasicDBObject("Date",1));
+                    currentdbQuerry = MongodbCloudCollectorData.getLastMinuteDBQuery();
                 }
+
+
                 if (!cloneDocuments( documents,this.connection)) {
                     break;
                 }
@@ -77,22 +80,18 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
                     first = false;
                 }
                 write(entry);
+            } catch (MongoWriteException | SQLException ignored) { }
+            try {
                 lastMedicao = CulturaDB.insertMedicao(entry.toString(), connection);
                 handlePredictedValue();
 
-            } catch (MongoWriteException e) {
-                //if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                    //System.out.println("Found Duplicate");
-                //}
-            } catch (SQLException throwables) {
-                System.out.println(this.getName()+"-"+problems+"ºProblemas com a connecção SQL");
-                //throwables.printStackTrace();
+            } catch (SQLException sqlException) {
+                //System.out.println(this.getName()+"-"+problems+"ºProblemas com a connecção SQL");
                 problems++;
                 if(problems ==10){
-                    System.out.println(this.getName()+" Obteve 10 erros- Quitting");
+                    System.out.println(this.getName()+" Conecção com SQL perdida- Quitting");
                     return false;
                 }
-                //throwables.printStackTrace();
             }catch(Exception e){
                 System.out.println(this.getName()+ ERRO_GERAL_CONTACTE_O_SUPORTE);
                 return false;

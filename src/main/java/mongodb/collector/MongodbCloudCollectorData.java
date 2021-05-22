@@ -29,6 +29,7 @@ public class MongodbCloudCollectorData implements Serializable {
     private int yeardateformongoclone;
     private int monthdateformongoclone;
     private int daydateformongoclone;
+    private int hourdateformongoclone;
     public static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd 'at' HH:mm:ss 'GMT'");
 
 
@@ -48,7 +49,8 @@ public class MongodbCloudCollectorData implements Serializable {
                                      String localmongodbname,
                                      int yeardateformongoclone,
                                      int monthdateformongoclone,
-                                     int daydateformongoclone
+                                     int daydateformongoclone,
+                                     int hourdateformongoclone
     ) {
         this.user = user;
         this.databaseUser = databaseUser;
@@ -66,6 +68,7 @@ public class MongodbCloudCollectorData implements Serializable {
         this.yeardateformongoclone = yeardateformongoclone;
         this.monthdateformongoclone = monthdateformongoclone;
         this.daydateformongoclone = daydateformongoclone;
+        this.hourdateformongoclone = hourdateformongoclone;
     }
 /**
  * Constructor with the default values for the config data
@@ -89,6 +92,7 @@ public class MongodbCloudCollectorData implements Serializable {
         this.yeardateformongoclone = date.getYear();
         this.monthdateformongoclone =date.getMonthValue();
         this.daydateformongoclone = 0;
+        hourdateformongoclone=0;
     }
 
     public String       getUser() {                                             return user;                                            }
@@ -122,7 +126,9 @@ public class MongodbCloudCollectorData implements Serializable {
     public int          getMonthdateformongoclone() {                           return monthdateformongoclone;                          }
     public void         setMonthdateformongoclone(int monthdateformongoclone) { this.monthdateformongoclone = monthdateformongoclone;   }
     public int          getDaydateformongoclone() {                             return daydateformongoclone;                            }
-    public void         setDaydateformongoclone(int daydateformongoclone) {     this.daydateformongoclone = daydateformongoclone;       }
+    public void         setDaydateformongoclone(int hourdateformongoclone) {    this.daydateformongoclone = hourdateformongoclone;     }
+    public int          getHourdateformongoclone() {                            return hourdateformongoclone;                           }
+    public void         setHourdateformongoclone(int hourdateformongoclone) {   this.hourdateformongoclone = hourdateformongoclone;     }
 
     /**
      * Method To change Config Settings
@@ -200,6 +206,13 @@ public class MongodbCloudCollectorData implements Serializable {
                     System.out.println("Não foi dado um número para "+ ConfigParams.DAYDATEFORMONGOCLONE.getLabel());
                     return false;
                 }
+            } else if(setting2Change.equalsIgnoreCase(ConfigParams.HOURDATEFORMONGOCLONE.getLabel())){
+                try{
+                setHourdateformongoclone(Integer.parseInt(newSingleValue));
+                } catch (NumberFormatException e) {
+                    System.out.println("Não foi dado um número para "+ ConfigParams.HOURDATEFORMONGOCLONE.getLabel());
+                    return false;
+                }
             }else{
                 System.out.println("Parametro de configuração desconhecido");
                 return false;
@@ -228,8 +241,14 @@ public class MongodbCloudCollectorData implements Serializable {
         }else{
             day += daydateformongoclone;
         }
+        String hour="";
+        if(hourdateformongoclone < 10){
+            day +="0"+ hourdateformongoclone;
+        }else{
+            day += hourdateformongoclone;
+        }
 
-        return getYeardateformongoclone() + "-" + month + "-" + day + " at 00:00:00 GMT";
+        return getYeardateformongoclone() + "-" + month + "-" + day + " at " + hour + ":00:00 GMT";
     }
 
     public static BasicDBObject getLastMinuteDBQuery() {
@@ -259,6 +278,8 @@ public class MongodbCloudCollectorData implements Serializable {
                 "\n  " + spacer + ConfigParams.YEARDATEFORMONGOCLONE    +"='" + yeardateformongoclone           + '\'' +
                 "\n  " + spacer + ConfigParams.MONTHDATEFORMONGOCLONE   +"='" + monthdateformongoclone          + '\'' +
                 "\n  " + spacer + ConfigParams.DAYDATEFORMONGOCLONE     +"='" + daydateformongoclone            + '\'' +
+                "\n  " + spacer + ConfigParams.HOURDATEFORMONGOCLONE    +"='" + hourdateformongoclone           + '\'' +
+
                 "\n}";
     }
 

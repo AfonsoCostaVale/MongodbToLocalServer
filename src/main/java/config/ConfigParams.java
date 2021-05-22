@@ -17,7 +17,8 @@ public enum ConfigParams {
     LOCALMONGODBNAME("localmongodbname"),
     YEARDATEFORMONGOCLONE("yeardateformongoclone"),
     MONTHDATEFORMONGOCLONE("monthdateformongoclone"),
-    DAYDATEFORMONGOCLONE("daydateformongoclone");
+    DAYDATEFORMONGOCLONE("daydateformongoclone"),
+    HOURDATEFORMONGOCLONE("hourdateformongoclone");
 
     private final String label;
 

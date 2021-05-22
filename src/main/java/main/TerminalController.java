@@ -96,10 +96,12 @@ public class TerminalController{
             }
         }
 
-        if(mongodbCloudCollector.isAlive()){
-            mongodbCloudCollector.killWriters();
-            mongodbCloudCollector.join();
-        }
+        try {
+            if(mongodbCloudCollector.isAlive()){
+                mongodbCloudCollector.killWriters();
+                mongodbCloudCollector.join();
+            }
+        } catch (NullPointerException ignored) { }
 
         System.out.println("A sair do programa.");
     }
@@ -219,9 +221,11 @@ public class TerminalController{
         }
     }
     private void dispatchedPararALL() {
-        mongodbCloudCollector.killWriters();
+        try {
+            mongodbCloudCollector.killWriters();
+            System.out.println("Todos os cloners foram parados com sucesso.");
+        } catch (NullPointerException ignored) { }
         isImport = false;
-        System.out.println("Todos os cloners foram parados com sucesso.");
     }
 
     private void dispatchedAlterar(List<String> alterarNewValue) {

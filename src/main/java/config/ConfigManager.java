@@ -27,9 +27,10 @@ public class ConfigManager {
                     "//MQTTQOS is the Quality of service used in the mqtt connection\n",
                     "//MQTTTOPIC is the topic used in the mqtt connection\n",
                     "//LOCALMONGODBNAME is the name used for the local mongoDatabase\n",
-                    "//YEARDATEFORMONGOCLONE is the year at which documents start getting cloned from the cloud \n",
-                    "//MONTHDATEFORMONGOCLONE is the month at which documents start getting cloned from the cloud \n",
-                    "//DAYDATEFORMONGOCLONE is the day at which documents start getting cloned from the cloud \n",
+                    "//YEARDATEFORMONGOCLONE is the year from which documents start getting cloned from the cloud \n",
+                    "//MONTHDATEFORMONGOCLONE is the month from which documents start getting cloned from the cloud \n",
+                    "//DAYDATEFORMONGOCLONE is the day from which documents start getting cloned from the cloud \n",
+                    "//HOURDATEFORMONGOCLONE is the hour from which documents start getting cloned from the cloud \n",
             };
 
     public String getFilename() {
@@ -87,6 +88,8 @@ public class ConfigManager {
             myWriter.write(ConfigParams.MONTHDATEFORMONGOCLONE + "=" + dataToWrite.getMonthdateformongoclone() + "\n");
             myWriter.write(COMMENT[15]);
             myWriter.write(ConfigParams.DAYDATEFORMONGOCLONE + "=" + dataToWrite.getDaydateformongoclone() + "\n");
+            myWriter.write(COMMENT[16]);
+            myWriter.write(ConfigParams.HOURDATEFORMONGOCLONE + "=" + dataToWrite.getHourdateformongoclone() + "\n");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -171,6 +174,9 @@ public class ConfigManager {
                             break;
                         case DAYDATEFORMONGOCLONE:
                             data.setDaydateformongoclone(Integer.parseInt(lineContent[1]));
+                            break;
+                        case HOURDATEFORMONGOCLONE:
+                            data.setHourdateformongoclone(Integer.parseInt(lineContent[1]));
                             break;
 
                         default:
