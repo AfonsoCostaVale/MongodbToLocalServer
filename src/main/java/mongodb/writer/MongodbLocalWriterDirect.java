@@ -80,10 +80,9 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
                     first = false;
                 }
                 write(entry);
-            } catch (MongoWriteException | SQLException ignored) { }
-            try {
                 lastMedicao = CulturaDB.insertMedicao(entry.toString(), connection);
                 handlePredictedValue();
+            } catch (MongoWriteException ignored) {
 
             } catch (SQLException sqlException) {
                 //System.out.println(this.getName()+"-"+problems+"ºProblemas com a connecção SQL");
