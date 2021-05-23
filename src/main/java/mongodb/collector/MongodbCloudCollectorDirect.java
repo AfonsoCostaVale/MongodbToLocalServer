@@ -28,7 +28,7 @@ public class MongodbCloudCollectorDirect extends MongodbCloudCollector {
 
     @Override
     protected void writeInfo(MongoDatabase db) throws InterruptedException, SQLException {
-        Connection connection = CulturaDB.getLocalConnection();
+        Connection connection = CulturaDB.getLocalClonerConnection();
 //        MQTTWriter mqttWriter= new MQTTWriter(GeneralMqttVariables.BROKER,GeneralMqttVariables.CLIENT_ID,GeneralMqttVariables.PERSISTENCE);
 //        mqttWriter.connect();
         for (String collection : data.getCollections()) {
