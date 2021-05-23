@@ -5,6 +5,7 @@ import config.ConfigParams;
 import mqtt.GeneralMqttVariables;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -242,10 +243,11 @@ public class MongodbCloudCollectorData implements Serializable {
             day += daydateformongoclone;
         }
         String hour="";
+        int hourdateformongoclone=getHourdateformongoclone();
         if(hourdateformongoclone < 10){
-            day +="0"+ hourdateformongoclone;
+            hour +="0"+ hourdateformongoclone;
         }else{
-            day += hourdateformongoclone;
+            hour += hourdateformongoclone;
         }
 
         return getYeardateformongoclone() + "-" + month + "-" + day + " at " + hour + ":00:00 GMT";
@@ -254,7 +256,8 @@ public class MongodbCloudCollectorData implements Serializable {
     public static BasicDBObject getLastMinuteDBQuery() {
         BasicDBObject dbQuerry= new BasicDBObject();
         LocalDateTime dateTimeNow = LocalDateTime.now();
-        dbQuerry.put("Data", new BasicDBObject("$gt", java.time.LocalDate.now() + " at " + dateTimeNow.getHour() + ":" +dateTimeNow.getMinute() + ":00 GMT"));
+        String dateString = LocalDate.now() + " at " + dateTimeNow.getHour() + ":" + dateTimeNow.getMinute() + ":00 GMT";
+        dbQuerry.put("Data", new BasicDBObject("$gt", dateString));
         return dbQuerry;
     }
 
