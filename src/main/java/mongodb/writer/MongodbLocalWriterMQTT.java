@@ -11,6 +11,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.io.IOException;
 
+import static com.mongodb.client.model.Filters.gt;
+import static com.mongodb.client.model.Filters.gte;
+
 public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
 
     private final MQTTWriter mqttWriter;
@@ -33,19 +36,17 @@ public class MongodbLocalWriterMQTT extends MongodbLocalWriter {
     public void run() {
         try {
             boolean first = true;
-                BasicDBObject currentdbQuerry= MongodbCloudCollectorData.getLastMinuteDBQuery();
+                String currentdbQuerry= MongodbCloudCollectorData.getLastMinuteDBQuery();
             while (!Thread.currentThread().isInterrupted()) {
                 //System.out.println(this.getName() + " Started writing in " + collectionToWrite.getNamespace().getFullName());
 
                 FindIterable<Document> documents;
 
                 if (first) {
-                    BasicDBObject dbQuerry= new BasicDBObject();
-                    dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
-                    documents = collectionToRead.find(dbQuerry).sort(new BasicDBObject("Date",1));
+                    documents = collectionToRead.find(gte("Data",data.getDateString()));
                     first = false;
                 } else {
-                    documents = collectionToRead.find(currentdbQuerry).sort(new BasicDBObject("Date",1));
+                    documents = collectionToRead.find(gte("Data",currentdbQuerry));
                     currentdbQuerry= MongodbCloudCollectorData.getLastMinuteDBQuery();
                 }
                 if (!cloneDocuments(documents)) {

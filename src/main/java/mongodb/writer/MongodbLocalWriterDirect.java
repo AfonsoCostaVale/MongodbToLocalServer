@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import static com.mongodb.client.model.Filters.*;
+
 public class MongodbLocalWriterDirect extends MongodbLocalWriter {
 
     private final Connection connection;
@@ -39,21 +41,19 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
         try {
             //System.out.println("Started writing in " + collectionToWrite.getNamespace().getFullName());
             boolean first = true;
-            BasicDBObject currentdbQuerry=MongodbCloudCollectorData.getLastMinuteDBQuery();
+            String currentdbQuerry=MongodbCloudCollectorData.getLastMinuteDBQuery();
 
              while (!Thread.currentThread().isInterrupted()){
 
                 FindIterable<Document> documents;
 
-
-
                 if (first) {
-                    BasicDBObject dbQuerry= new BasicDBObject();
-                    dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
-                    documents = collectionToRead.find(dbQuerry).sort(new BasicDBObject("Date",1));
+                    //BasicDBObject dbQuerry= new BasicDBObject();
+                    //dbQuerry.put("Data", new BasicDBObject("$gt",  data.getDateString()));
+                    documents = collectionToRead.find(gte("Data",data.getDateString()));
                     first = false;
                 } else {
-                    documents = collectionToRead.find(currentdbQuerry).sort(new BasicDBObject("Date",1));
+                    documents = collectionToRead.find(gte("Data",currentdbQuerry));
                     currentdbQuerry = MongodbCloudCollectorData.getLastMinuteDBQuery();
                 }
 
@@ -66,6 +66,7 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
 
             //enterCheckMode();
         }catch (Exception e){
+            e.printStackTrace();
             System.out.println(this.getName()+ ERRO_GERAL_CONTACTE_O_SUPORTE);
         }
     }
@@ -73,6 +74,7 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
     private boolean cloneDocuments(FindIterable<Document> documents, Connection connection) {
         boolean first=true;
         int problems =0;
+        System.out.println(this.getName()+" clonning");
         for (Document entry : documents) {
             try {
                 if(first){

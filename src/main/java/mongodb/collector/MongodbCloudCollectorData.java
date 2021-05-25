@@ -242,23 +242,26 @@ public class MongodbCloudCollectorData implements Serializable {
         }else{
             day += daydateformongoclone;
         }
+
         String hour="";
         int hourdateformongoclone=getHourdateformongoclone();
+
         if(hourdateformongoclone < 10){
             hour +="0"+ hourdateformongoclone;
         }else{
             hour += hourdateformongoclone;
         }
 
-        return getYeardateformongoclone() + "-" + month + "-" + day + " at " + hour + ":00:00 GMT";
+        String date = getYeardateformongoclone() + "-" + month + "-" + day + "T" + hour + ":00:00Z";
+        return date;
     }
 
-    public static BasicDBObject getLastMinuteDBQuery() {
+    public static String getLastMinuteDBQuery() {
         BasicDBObject dbQuerry= new BasicDBObject();
         LocalDateTime dateTimeNow = LocalDateTime.now();
-        String dateString = LocalDate.now() + " at " + dateTimeNow.getHour() + ":" + dateTimeNow.getMinute() + ":00 GMT";
+        String dateString = LocalDate.now() + "T" + dateTimeNow.getHour() + ":" + dateTimeNow.getMinute() + ":00Z";
         dbQuerry.put("Data", new BasicDBObject("$gt", dateString));
-        return dbQuerry;
+        return dateString;
     }
 
     @Override
