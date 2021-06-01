@@ -74,7 +74,7 @@ public class MongodbLocalWriterDirect extends MongodbLocalWriter {
     private boolean cloneDocuments(FindIterable<Document> documents, Connection connection) {
         boolean first=true;
         int problems =0;
-        System.out.println(this.getName()+" clonning");
+        //System.out.println(this.getName()+" clonning");
         for (Document entry : documents) {
             try {
                 if(first){
